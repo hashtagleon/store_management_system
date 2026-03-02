@@ -10,14 +10,14 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyPLACEHOLDER_REPLACE_ME",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  apiKey: "AIzaSyBjreDZZvFtJbl4JkfWASTQjFb2JAJ77MI",
+  authDomain: "bksp-store.firebaseapp.com",
   databaseURL:
-    "https://YOUR_PROJECT-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "YOUR_PROJECT",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "000000000000",
-  appId: "1:000000000000:web:0000000000000000",
+    "https://bksp-store-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "bksp-store",
+  storageBucket: "bksp-store.firebasestorage.app",
+  messagingSenderId: "280314720011",
+  appId: "1:280314720011:web:de4389867d5e692ce17c0e",
 };
 
 const app = initializeApp(firebaseConfig);
