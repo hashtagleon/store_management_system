@@ -63,29 +63,32 @@ function doLogin() {
 
 // ===== INIT (Firebase real-time listener) =====
 function init() {
-  const dataRef = ref(db, DB_ROOT);
-  onValue(
-    dataRef,
-    (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        products = data.products || [];
-        transactions = data.transactions || [];
-      } else {
-        products = [];
-        transactions = [];
-      }
-      renderAll();
-      setTodayDates();
-      updateCategoryFilter();
-      hideLoader();
-    },
-    (error) => {
-      console.error("Firebase read error:", error);
-      hideLoader();
-      showToast("❌ Firebase সংযোগে সমস্যা হয়েছে।", "error");
-    },
-  );
+    // Show loader only now (after login)
+    const loader = document.getElementById('firebaseLoader');
+    if (loader) loader.style.display = 'flex';
+
+    const dataRef = ref(db, DB_ROOT);
+    onValue(dataRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            products     = data.products     || [];
+            transactions = data.transactions || [];
+        } else {
+            products = []; transactions = [];
+        }
+        renderAll();
+        setTodayDates();
+        updateCategoryFilter();
+        hideLoader();
+    }, (error) => {
+        console.error('Firebase read error:', error);
+        hideLoader();
+        showToast('❌ Firebase সংযোগে সমস্যা হয়েছে।', 'error');
+        // Still render the empty app so it's usable
+        renderAll();
+        setTodayDates();
+        updateCategoryFilter();
+    });
 }
 
 function setTodayDates() {
