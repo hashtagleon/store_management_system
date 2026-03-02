@@ -1276,3 +1276,41 @@ window.addEventListener("DOMContentLoaded", () => {
       .catch((err) => console.warn("SW registration failed:", err));
   }
 });
+
+// ===== EXPOSE FUNCTIONS TO GLOBAL SCOPE (required for ES module) =====
+// HTML onclick attributes cannot access module-scoped functions directly
+Object.assign(window, {
+    doLogin,
+    init,
+    openModal,
+    closeModal,
+    closeModalOutside,
+    switchTab,
+    filterStock,
+    filterTransactions,
+    updateIssueStock,
+    submitIssue,
+    submitReceive,
+    txnConfirmOK,
+    quickReceive,
+    quickIssue,
+    deleteProduct,
+    confirmPartialDelete,
+    addProduct,
+    exportStockCSV,
+    exportStockPDF,
+    exportTransCSV,
+    exportTransPDF,
+    printStock,
+    printTransactions,
+    resetAllData,
+    editProduct,
+    saveEditProduct,
+    fullDeleteProduct,
+    confirmFullDelete,
+    openLedger,
+    generateReport,
+    exportBackupJSON,
+    importBackupJSON,
+    installPWA,
+});
