@@ -1,0 +1,787 @@
+<!doctype html>
+<html lang="bn">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>বিকেএসপি স্টোর ম্যানেজমেন্ট</title>
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#6366f1" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="স্টোর" />
+    <meta name="description" content="বিকেএসপি পাবলিক স্কুল এন্ড কলেজ স্টোর ম্যানেজমেন্ট সিস্টেম" />
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <!-- jsPDF for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.6.0/jspdf.plugin.autotable.min.js"></script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+
+    <!-- ====== LOGIN SCREEN ====== -->
+    <div id="loginScreen">
+      <div class="login-card">
+        <div class="login-icon">📦</div>
+        <h1 class="login-title">বিকেএসপি পাবলিক স্কুল এন্ড কলেজ</h1>
+        <p class="login-subtitle">স্টোর ম্যানেজমেন্ট সিস্টেম</p>
+        <div class="login-form">
+          <label class="login-label">🔑 পাসওয়ার্ড</label>
+          <input
+            type="password"
+            id="loginPasswordInput"
+            class="login-input"
+            placeholder="পাসওয়ার্ড লিখুন"
+            onkeydown="if(event.key==='Enter') doLogin()"
+            autocomplete="off"
+          />
+          <p id="loginError" class="login-error">❌ পাসওয়ার্ড সঠিক নয়।</p>
+          <button class="btn btn-primary login-btn" onclick="doLogin()">প্রবেশ করুন →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== APP CONTENT ====== -->
+    <div id="appContent" style="display:none;">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="header-inner">
+        <div class="header-logo">
+          <div class="logo-icon">📦</div>
+          <div>
+            <h1 class="header-title">বিকেএসপি পাবলিক স্কুল এন্ড কলেজ</h1>
+            <p class="header-subtitle">স্টোর ম্যানেজমেন্ট সিস্টেম</p>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-outline" onclick="openModal('exportModal')">
+            📥 Export / Print
+          </button>
+          <button class="btn btn-outline btn-reset-header" onclick="openModal('resetModal')">
+            🔄 রিসেট
+          </button>
+          <button
+            class="btn btn-primary"
+            onclick="openModal('addProductModal')"
+          >
+            + নতুন পণ্য
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- ====== LOW STOCK ALERT BANNER ====== -->
+    <div id="lowStockBanner" class="low-stock-banner" style="display:none;">
+      <div class="lsb-inner">
+        <span class="lsb-icon">⚠️</span>
+        <span id="lowStockBannerText">কিছু পণ্যের স্টক কম বা শেষ হয়ে গেছে।</span>
+        <button class="lsb-close" onclick="document.getElementById('lowStockBanner').style.display='none'">✕</button>
+      </div>
+    </div>
+
+    <!-- Dashboard Stats -->
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat-card stat-blue">
+          <div class="stat-icon">📋</div>
+          <div class="stat-info">
+            <div class="stat-value" id="totalItems">0</div>
+            <div class="stat-label">মোট আইটেম</div>
+          </div>
+        </div>
+        <div class="stat-card stat-green">
+          <div class="stat-icon">✅</div>
+          <div class="stat-info">
+            <div class="stat-value" id="inStock">0</div>
+            <div class="stat-label">স্টকে আছে</div>
+          </div>
+        </div>
+        <div class="stat-card stat-red">
+          <div class="stat-icon">⚠️</div>
+          <div class="stat-info">
+            <div class="stat-value" id="lowStockCount">0</div>
+            <div class="stat-label">কম স্টক</div>
+          </div>
+        </div>
+        <div class="stat-card stat-purple">
+          <div class="stat-icon">📊</div>
+          <div class="stat-info">
+            <div class="stat-value" id="totalTransactions">0</div>
+            <div class="stat-label">মোট লেনদেন</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('stock', this)">
+          📦 স্টক রেজিস্টার
+        </button>
+        <button class="tab" onclick="switchTab('transactions', this)">
+          📝 লেনদেন ইতিহাস
+        </button>
+        <button class="tab" onclick="switchTab('issue', this)">
+          🔄 ইস্যু করুন
+        </button>
+        <button class="tab" onclick="switchTab('receive', this)">
+          📥 মাল গ্রহণ
+        </button>
+        <button class="tab" onclick="switchTab('report', this)">
+          📊 রিপোর্ট
+        </button>
+      </div>
+
+      <!-- Stock Register Tab -->
+      <div id="tab-stock" class="tab-content active">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">স্টক রেজিস্টার</h2>
+            <div class="search-filter">
+              <input
+                type="text"
+                id="searchStock"
+                class="search-input"
+                placeholder="🔍 পণ্য খুঁজুন..."
+                oninput="filterStock()"
+              />
+              <select
+                id="filterCategory"
+                class="filter-select"
+                onchange="filterStock()"
+              >
+                <option value="">সব ক্যাটাগরি</option>
+              </select>
+              <button class="btn btn-primary" onclick="openModal('addProductModal')">
+                + নতুন পণ্য যোগ করুন
+              </button>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table" id="stockTable">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>পণ্যের নাম</th>
+                  <th>ক্যাটাগরি</th>
+                  <th>একক</th>
+                  <th>বর্তমান স্টক</th>
+                  <th>ন্যূনতম স্টক</th>
+                  <th>সর্বশেষ ইন</th>
+                  <th>সর্বশেষ ইস্যু</th>
+                  <th>অবস্থা</th>
+                  <th>অ্যাকশন</th>
+                </tr>
+              </thead>
+              <tbody id="stockTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Transactions Tab -->
+      <div id="tab-transactions" class="tab-content">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">লেনদেন ইতিহাস</h2>
+            <div class="search-filter">
+              <input
+                type="text"
+                id="searchTrans"
+                class="search-input"
+                placeholder="🔍 খুঁজুন..."
+                oninput="filterTransactions()"
+              />
+              <select
+                id="filterTransType"
+                class="filter-select"
+                onchange="filterTransactions()"
+              >
+                <option value="">সব ধরন</option>
+                <option value="in">মাল গ্রহণ (IN)</option>
+                <option value="issue">ইস্যু (ISSUE)</option>
+              </select>
+              <input
+                type="date"
+                id="filterDate"
+                class="filter-select"
+                onchange="filterTransactions()"
+              />
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table" id="transTable">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>তারিখ ও সময়</th>
+                  <th>ধরন</th>
+                  <th>পণ্যের নাম</th>
+                  <th>পরিমাণ</th>
+                  <th>ইস্যু প্রাপক / সরবরাহকারী</th>
+                  <th>বিভাগ/উদ্দেশ্য</th>
+                  <th>মন্তব্য</th>
+                </tr>
+              </thead>
+              <tbody id="transTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Issue Tab -->
+      <div id="tab-issue" class="tab-content">
+        <div class="card form-card">
+          <h2 class="card-title">📤 পণ্য ইস্যু করুন</h2>
+          <form id="issueForm" onsubmit="submitIssue(event)">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>পণ্য নির্বাচন করুন *</label>
+                <select
+                  id="issueProduct"
+                  class="form-control"
+                  required
+                  onchange="updateIssueStock()"
+                >
+                  <option value="">-- পণ্য বেছে নিন --</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>বর্তমান স্টক</label>
+                <input
+                  type="text"
+                  id="issueCurrentStock"
+                  class="form-control"
+                  readonly
+                  placeholder="পণ্য নির্বাচন করুন"
+                />
+              </div>
+              <div class="form-group">
+                <label>ইস্যু পরিমাণ *</label>
+                <input
+                  type="number"
+                  id="issueQty"
+                  class="form-control"
+                  min="1"
+                  required
+                  placeholder="পরিমাণ লিখুন"
+                />
+              </div>
+              <div class="form-group">
+                <label>ইস্যু তারিখ *</label>
+                <input
+                  type="date"
+                  id="issueDate"
+                  class="form-control"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label>প্রাপকের নাম *</label>
+                <input
+                  type="text"
+                  id="issueToName"
+                  class="form-control"
+                  required
+                  placeholder="যার নামে ইস্যু করা হচ্ছে"
+                />
+              </div>
+              <div class="form-group">
+                <label>বিভাগ / পদবী</label>
+                <input
+                  type="text"
+                  id="issueDept"
+                  class="form-control"
+                  placeholder="বিভাগ বা পদবী লিখুন"
+                />
+              </div>
+              <div class="form-group">
+                <label>উদ্দেশ্য / কারণ</label>
+                <input
+                  type="text"
+                  id="issuePurpose"
+                  class="form-control"
+                  placeholder="ইস্যুর উদ্দেশ্য"
+                />
+              </div>
+              <div class="form-group">
+                <label>মন্তব্য</label>
+                <input
+                  type="text"
+                  id="issueNote"
+                  class="form-control"
+                  placeholder="অতিরিক্ত মন্তব্য"
+                />
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="reset" class="btn btn-outline">রিসেট</button>
+              <button type="submit" class="btn btn-danger">
+                📤 ইস্যু নিশ্চিত করুন
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Receive Tab -->
+      <div id="tab-receive" class="tab-content">
+        <div class="card form-card">
+          <h2 class="card-title">📥 মাল গ্রহণ (Stock In)</h2>
+          <form id="receiveForm" onsubmit="submitReceive(event)">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>পণ্য নির্বাচন করুন *</label>
+                <select id="receiveProduct" class="form-control" required>
+                  <option value="">-- পণ্য বেছে নিন --</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>গ্রহণ পরিমাণ *</label>
+                <input
+                  type="number"
+                  id="receiveQty"
+                  class="form-control"
+                  min="1"
+                  required
+                  placeholder="পরিমাণ লিখুন"
+                />
+              </div>
+              <div class="form-group">
+                <label>গ্রহণের তারিখ *</label>
+                <input
+                  type="date"
+                  id="receiveDate"
+                  class="form-control"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label>সরবরাহকারীর নাম</label>
+                <input
+                  type="text"
+                  id="receiveSupplier"
+                  class="form-control"
+                  placeholder="সরবরাহকারীর নাম"
+                />
+              </div>
+              <div class="form-group">
+                <label>ইনভয়েস/চালান নং</label>
+                <input
+                  type="text"
+                  id="receiveInvoice"
+                  class="form-control"
+                  placeholder="ইনভয়েস নম্বর"
+                />
+              </div>
+              <div class="form-group">
+                <label>মন্তব্য</label>
+                <input
+                  type="text"
+                  id="receiveNote"
+                  class="form-control"
+                  placeholder="অতিরিক্ত মন্তব্য"
+                />
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="reset" class="btn btn-outline">রিসেট</button>
+              <button type="submit" class="btn btn-success">
+                📥 গ্রহণ নিশ্চিত করুন
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+      <!-- ====== REPORT TAB ====== -->
+      <div id="tab-report" class="tab-content">
+        <div class="card form-card">
+          <h2 class="card-title">📊 তারিখ-ভিত্তিক রিপোর্ট</h2>
+          <div class="form-grid" style="margin-bottom:20px;">
+            <div class="form-group">
+              <label>শুরুর তারিখ</label>
+              <input type="date" id="reportFrom" class="form-control" />
+            </div>
+            <div class="form-group">
+              <label>শেষের তারিখ</label>
+              <input type="date" id="reportTo" class="form-control" />
+            </div>
+            <div class="form-group" style="justify-content:flex-end;">
+              <label style="visibility:hidden;">Action</label>
+              <button class="btn btn-primary" onclick="generateReport()">📊 রিপোর্ট দেখুন</button>
+            </div>
+          </div>
+          <div id="reportResult" style="display:none;">
+            <div class="report-stats-grid" id="reportSummaryCards"></div>
+            <div class="report-tables">
+              <div>
+                <h3 class="report-section-title">📥 মাল গ্রহণ (IN)</h3>
+                <div class="table-wrapper">
+                  <table class="data-table">
+                    <thead><tr><th>#</th><th>তারিখ</th><th>পণ্য</th><th>পরিমাণ</th><th>সরবরাহকারী</th><th>মন্তব্য</th></tr></thead>
+                    <tbody id="reportInBody"></tbody>
+                  </table>
+                </div>
+              </div>
+              <div style="margin-top:24px;">
+                <h3 class="report-section-title">📤 ইস্যু (ISSUE)</h3>
+                <div class="table-wrapper">
+                  <table class="data-table">
+                    <thead><tr><th>#</th><th>তারিখ</th><th>পণ্য</th><th>পরিমাণ</th><th>প্রাপক</th><th>বিভাগ</th><th>মন্তব্য</th></tr></thead>
+                    <tbody id="reportIssueBody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="reportEmpty" style="display:none;" class="empty-state"><span class="emoji">📅</span>নির্বাচিত তারিখে কোনো লেনদেন নেই।</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Export / Print Modal -->
+    <div id="exportModal" class="modal-overlay" onclick="closeModalOutside(event, 'exportModal')">
+      <div class="modal" style="max-width:480px;">
+        <div class="modal-header">
+          <h3>📥 Export / Print</h3>
+          <button class="modal-close" onclick="closeModal('exportModal')">✕</button>
+        </div>
+
+        <!-- Stock Export -->
+        <div class="export-section">
+          <h4 class="export-section-title">📦 স্টক রেজিস্টার</h4>
+          <div class="export-btns">
+            <button class="btn btn-outline export-btn" onclick="exportStockCSV()">📄 CSV</button>
+            <button class="btn btn-outline export-btn" onclick="exportStockPDF()">📕 PDF</button>
+            <button class="btn btn-outline export-btn" onclick="printStock()">🖨️ প্রিন্ট</button>
+          </div>
+        </div>
+
+        <hr class="export-divider"/>
+
+        <!-- Transaction Export with date filter -->
+        <div class="export-section">
+          <h4 class="export-section-title">📝 লেনদেন ইতিহাস</h4>
+          <div class="export-date-row">
+            <div class="form-group">
+              <label>শুরুর তারিখ</label>
+              <input type="date" id="exportFromDate" class="form-control" />
+            </div>
+            <div class="form-group">
+              <label>শেষের তারিখ</label>
+              <input type="date" id="exportToDate" class="form-control" />
+            </div>
+          </div>
+          <p class="export-hint">ফাঁকা রাখলে সব লেনদেন export হবে।</p>
+          <div class="export-btns">
+            <button class="btn btn-outline export-btn" onclick="exportTransCSV()">📄 CSV</button>
+            <button class="btn btn-outline export-btn" onclick="exportTransPDF()">📕 PDF</button>
+            <button class="btn btn-outline export-btn" onclick="printTransactions()">🖨️ প্রিন্ট</button>
+          </div>
+        </div>
+
+        <hr class="export-divider"/>
+
+        <!-- Backup & Restore -->
+        <div class="export-section">
+          <h4 class="export-section-title">💾 ব্যাকআপ ও রিস্টোর</h4>
+          <p class="export-hint">সমস্ত ডেটা JSON ফাইলে সেভ করুন বা আগের ব্যাকআপ লোড করুন।</p>
+          <div class="export-btns">
+            <button class="btn btn-outline export-btn" onclick="exportBackupJSON()">💾 ব্যাকআপ নিন</button>
+            <button class="btn btn-outline export-btn" onclick="document.getElementById('importFileInput').click()">📂 রিস্টোর করুন</button>
+          </div>
+          <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="importBackupJSON(event)" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Transaction Confirmation Modal -->
+    <div id="txnConfirmModal" class="modal-overlay">
+      <div class="modal" style="max-width:400px; text-align:center;">
+        <div class="txn-confirm-icon" id="txnConfirmIcon">✅</div>
+        <h3 id="txnConfirmTitle" style="margin-bottom:10px; font-size:1.1rem;"></h3>
+        <p id="txnConfirmBody" style="color:var(--text-muted); font-size:0.9rem; line-height:1.7; margin-bottom:24px;"></p>
+        <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="txnConfirmOK()">
+          ✓ ঠিক আছে
+        </button>
+      </div>
+    </div>
+
+    <!-- Add Product Modal -->
+    <div
+      id="addProductModal"
+      class="modal-overlay"
+      onclick="closeModalOutside(event, 'addProductModal')"
+    >
+      <div class="modal">
+        <div class="modal-header">
+          <h3>নতুন পণ্য যোগ করুন</h3>
+          <button class="modal-close" onclick="closeModal('addProductModal')">
+            ✕
+          </button>
+        </div>
+        <form onsubmit="addProduct(event)">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>পণ্যের নাম *</label>
+              <input
+                type="text"
+                id="newProductName"
+                class="form-control"
+                required
+                placeholder="পণ্যের নাম লিখুন"
+              />
+            </div>
+            <div class="form-group">
+              <label>ক্যাটাগরি *</label>
+              <input
+                type="text"
+                id="newProductCategory"
+                class="form-control"
+                required
+                list="categoryList"
+                placeholder="ক্যাটাগরি লিখুন"
+              />
+              <datalist id="categoryList"></datalist>
+            </div>
+            <div class="form-group">
+              <label>একক (Unit) *</label>
+              <input
+                type="text"
+                id="newProductUnit"
+                class="form-control"
+                required
+                list="unitList"
+                placeholder="যেমন: পিস, কেজি, লিটার"
+              />
+              <datalist id="unitList">
+                <option value="পিস"></option>
+                <option value="কেজি"></option>
+                <option value="গ্রাম"></option>
+                <option value="লিটার"></option>
+                <option value="মিলি"></option>
+                <option value="বক্স"></option>
+                <option value="প্যাকেট"></option>
+                <option value="ডজন"></option>
+                <option value="রিম"></option>
+                <option value="বোতল"></option>
+                <option value="মিটার"></option>
+              </datalist>
+            </div>
+            <div class="form-group">
+              <label>প্রারম্ভিক স্টক</label>
+              <input
+                type="number"
+                id="newProductStock"
+                class="form-control"
+                min="0"
+                value="0"
+                placeholder="0"
+              />
+            </div>
+            <div class="form-group">
+              <label>ন্যূনতম স্টক (রিঅর্ডার লেভেল)</label>
+              <input
+                type="number"
+                id="newProductMinStock"
+                class="form-control"
+                min="0"
+                value="10"
+                placeholder="10"
+              />
+            </div>
+          </div>
+          <div class="modal-actions">
+            <button
+              type="button"
+              class="btn btn-outline"
+              onclick="closeModal('addProductModal')"
+            >
+              বাতিল
+            </button>
+            <button type="submit" class="btn btn-primary">✓ যোগ করুন</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Reset Confirmation Modal -->
+    <div id="resetModal" class="modal-overlay" onclick="closeModalOutside(event, 'resetModal')">
+      <div class="modal" style="max-width:420px;">
+        <div class="modal-header">
+          <h3>🔒 রিসেট সুরক্ষিত</h3>
+          <button class="modal-close" onclick="closeModal('resetModal')">✕</button>
+        </div>
+        <p style="color:var(--text-muted); margin-bottom:16px; line-height:1.7;">
+          এই কাজটি করলে <strong style="color:#f87171;">সমস্ত পণ্য এবং লেনদেন ইতিহাস চিরতরে মুছে যাবে।</strong><br/>
+          রিসেট করতে পাসওয়ার্ড দিন।
+        </p>
+        <div class="form-group" style="margin-bottom:8px;">
+          <label>🔑 পাসওয়ার্ড</label>
+          <input
+            type="password"
+            id="resetPassword"
+            class="form-control"
+            placeholder="পাসওয়ার্ড লিখুন"
+            onkeydown="if(event.key==='Enter') resetAllData()"
+          />
+        </div>
+        <p id="resetPassError" style="color:#f87171; font-size:0.82rem; margin-bottom:16px; display:none;">❌ পাসওয়ার্ড সঠিক নয়।</p>
+        <div class="modal-actions">
+          <button class="btn btn-outline" onclick="closeModal('resetModal')">বাতিল করুন</button>
+          <button class="btn btn-danger" onclick="resetAllData()">🗑️ হ্যাঁ, সব মুছুন</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Partial Stock Delete Modal -->
+    <div id="deleteStockModal" class="modal-overlay" onclick="closeModalOutside(event, 'deleteStockModal')">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>🗑️ স্টক কমান</h3>
+          <button class="modal-close" onclick="closeModal('deleteStockModal')">✕</button>
+        </div>
+        <div class="form-group" style="margin-bottom:16px;">
+          <label>পণ্যের নাম</label>
+          <input type="text" id="deleteProductName" class="form-control" readonly />
+        </div>
+        <div class="form-group" style="margin-bottom:16px;">
+          <label>বর্তমান স্টক</label>
+          <input type="text" id="deleteCurrentStock" class="form-control" readonly />
+        </div>
+        <div class="form-group" style="margin-bottom:16px;">
+          <label>কতটুকু কমাতে চান? *</label>
+          <input type="number" id="deleteQty" class="form-control" min="1" placeholder="পরিমাণ লিখুন" />
+        </div>
+        <div class="form-group" style="margin-bottom:8px;">
+          <label>কারণ (ঐচ্ছিক)</label>
+          <input type="text" id="deleteReason" class="form-control" placeholder="যেমন: নষ্ট হয়েছে, সমন্বয় ইত্যাদি" />
+        </div>
+        <div class="form-group" style="margin-bottom:8px;">
+          <label>🔑 পাসওয়ার্ড *</label>
+          <input
+            type="password"
+            id="deleteStockPassword"
+            class="form-control"
+            placeholder="পাসওয়ার্ড লিখুন"
+            onkeydown="if(event.key==='Enter') confirmPartialDelete()"
+          />
+        </div>
+        <p id="deletePassError" style="color:#f87171; font-size:0.82rem; margin-bottom:12px; display:none;">❌ পাসওয়ার্ড সঠিক নয়।</p>
+        <div class="modal-actions">
+          <button class="btn btn-outline" onclick="closeModal('deleteStockModal')">বাতিল</button>
+          <button class="btn btn-danger" onclick="confirmPartialDelete()">✓ স্টক কমান</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== EDIT PRODUCT MODAL ====== -->
+    <div id="editProductModal" class="modal-overlay" onclick="closeModalOutside(event, 'editProductModal')">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>✏️ পণ্য সম্পাদনা</h3>
+          <button class="modal-close" onclick="closeModal('editProductModal')">✕</button>
+        </div>
+        <form onsubmit="saveEditProduct(event)">
+          <input type="hidden" id="editProductId" />
+          <div class="form-grid">
+            <div class="form-group">
+              <label>পণ্যের নাম *</label>
+              <input type="text" id="editProductName" class="form-control" required placeholder="পণ্যের নাম" />
+            </div>
+            <div class="form-group">
+              <label>ক্যাটাগরি *</label>
+              <input type="text" id="editProductCategory" class="form-control" required list="categoryList" placeholder="ক্যাটাগরি" />
+            </div>
+            <div class="form-group">
+              <label>একক (Unit) *</label>
+              <input type="text" id="editProductUnit" class="form-control" required list="unitList" placeholder="পিস, কেজি, লিটার..." />
+            </div>
+            <div class="form-group">
+              <label>ন্যূনতম স্টক (রিঅর্ডার লেভেল)</label>
+              <input type="number" id="editProductMinStock" class="form-control" min="0" placeholder="10" />
+            </div>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn btn-outline" onclick="closeModal('editProductModal')">বাতিল</button>
+            <button type="submit" class="btn btn-primary">✓ সংরক্ষণ করুন</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ====== FULL DELETE PRODUCT MODAL ====== -->
+    <div id="fullDeleteModal" class="modal-overlay" onclick="closeModalOutside(event, 'fullDeleteModal')">
+      <div class="modal" style="max-width:420px;">
+        <div class="modal-header">
+          <h3>🗑️ পণ্য সম্পূর্ণ মুছুন</h3>
+          <button class="modal-close" onclick="closeModal('fullDeleteModal')">✕</button>
+        </div>
+        <p style="color:var(--text-muted); margin-bottom:16px; line-height:1.7;">
+          <strong id="fullDeleteProductName" style="color:#f87171;"></strong> পণ্যটি এবং এর সমস্ত লেনদেন ইতিহাস <strong style="color:#f87171;">চিরতরে মুছে যাবে।</strong>
+        </p>
+        <div class="form-group" style="margin-bottom:8px;">
+          <label>🔑 পাসওয়ার্ড *</label>
+          <input type="password" id="fullDeletePassword" class="form-control" placeholder="পাসওয়ার্ড লিখুন" onkeydown="if(event.key==='Enter') confirmFullDelete()" />
+        </div>
+        <p id="fullDeletePassError" style="color:#f87171; font-size:0.82rem; margin-bottom:16px; display:none;">❌ পাসওয়ার্ড সঠিক নয়।</p>
+        <div class="modal-actions">
+          <button class="btn btn-outline" onclick="closeModal('fullDeleteModal')">বাতিল</button>
+          <button class="btn btn-danger" onclick="confirmFullDelete()">🗑️ হ্যাঁ, মুছুন</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== PRODUCT LEDGER MODAL ====== -->
+    <div id="ledgerModal" class="modal-overlay" onclick="closeModalOutside(event, 'ledgerModal')">
+      <div class="modal" style="max-width:760px;">
+        <div class="modal-header">
+          <div>
+            <h3 id="ledgerTitle">📦 পণ্যের ইতিহাস</h3>
+            <p id="ledgerSubtitle" style="font-size:0.82rem; color:var(--text-muted); margin-top:4px;"></p>
+          </div>
+          <button class="modal-close" onclick="closeModal('ledgerModal')">✕</button>
+        </div>
+        <div class="ledger-summary" id="ledgerSummary"></div>
+        <div class="table-wrapper" style="margin-top:16px;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>তারিখ</th>
+                <th>ধরন</th>
+                <th>পরিমাণ</th>
+                <th>প্রাপক / সরবরাহকারী</th>
+                <th>বিভাগ / উদ্দেশ্য</th>
+                <th>মন্তব্য</th>
+              </tr>
+            </thead>
+            <tbody id="ledgerTableBody"></tbody>
+          </table>
+        </div>
+        <p id="ledgerEmpty" class="empty-state" style="display:none;"><span class="emoji">📋</span>এই পণ্যের কোনো লেনদেন নেই।</p>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        <span>Made with ❤️ by MOHAYMINUL ISLAM</span>
+        <span id="lastSavedLabel" class="last-saved"></span>
+        <button class="footer-pwa-btn" id="pwaInstallBtn" style="display:none" onclick="installPWA()">📲 অ্যাপ ইনস্টল করুন</button>
+      </div>
+    </footer>
+
+    </div><!-- /#appContent -->
+
+    <script src="app.js"></script>
+  </body>
+</html>

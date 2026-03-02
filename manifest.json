@@ -1,0 +1,28 @@
+{
+  "name": "বিকেএসপি স্টোর ম্যানেজমেন্ট",
+  "short_name": "স্টোর",
+  "description": "বিকেএসপি পাবলিক স্কুল এন্ড কলেজ — স্টোর ম্যানেজমেন্ট সিস্টেম",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#6366f1",
+  "background_color": "#0f172a",
+  "lang": "bn",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "screenshots": []
+}
