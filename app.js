@@ -34,7 +34,9 @@ function hideLoader() {
   if (loader) loader.style.display = "none";
 }
 
-// ===== LOGIN =====
+// ===== ROLE SYSTEM =====
+let currentRole = null; // 'admin' | 'viewer'
+
 // Password verified by char-code array (no plain text stored)
 function _verifyPwd(s) {
   const _c = [50, 53, 48, 55]; // char codes: '2','5','0','7'
@@ -42,53 +44,119 @@ function _verifyPwd(s) {
   return [...s].every((ch, i) => ch.charCodeAt(0) === _c[i]);
 }
 
+function enterAsViewer() {
+  currentRole = "viewer";
+  sessionStorage.setItem("_sx", "viewer");
+  document.getElementById("loginScreen").style.display = "none";
+  document.getElementById("appContent").style.display = "block";
+  applyRoleUI();
+  init();
+}
+
+function showAdminLoginForm() {
+  document.getElementById("adminLoginSection").style.display = "block";
+  document.getElementById("adminLoginToggleSection").style.display = "none";
+  setTimeout(() => {
+    const inp = document.getElementById("loginPasswordInput");
+    if (inp) inp.focus();
+  }, 100);
+}
+
 function doLogin() {
   const inp = document.getElementById("loginPasswordInput");
   const errEl = document.getElementById("loginError");
   const input = inp ? inp.value : "";
   if (_verifyPwd(input)) {
-    sessionStorage.setItem("_sx", "1");
+    currentRole = "admin";
+    sessionStorage.setItem("_sx", "admin");
     document.getElementById("loginScreen").style.display = "none";
     document.getElementById("appContent").style.display = "block";
     errEl.style.display = "none";
+    applyRoleUI();
     init();
   } else {
-    errEl.style.display = "block";
-    inp.value = "";
-    inp.classList.add("shake");
-    setTimeout(() => inp.classList.remove("shake"), 500);
-    inp.focus();
+    if (errEl) errEl.style.display = "block";
+    if (inp) {
+      inp.value = "";
+      inp.classList.add("shake");
+      setTimeout(() => inp.classList.remove("shake"), 500);
+      inp.focus();
+    }
   }
+}
+
+function applyRoleUI() {
+  const isAdmin = currentRole === "admin";
+  // Role badge
+  const badge = document.getElementById("roleBadge");
+  const viewerBar = document.getElementById("viewerInfoBar");
+  if (badge) {
+    badge.textContent = isAdmin ? "🔐 Super Admin" : "👁️ View Only";
+    badge.className = isAdmin
+      ? "role-badge role-admin"
+      : "role-badge role-viewer";
+  }
+  if (viewerBar) viewerBar.style.display = isAdmin ? "none" : "flex";
+
+  // Admin-only header buttons
+  document.querySelectorAll("[data-admin-only]").forEach((el) => {
+    el.style.display = isAdmin ? "" : "none";
+  });
+
+  // Admin-only tabs
+  document.querySelectorAll("[data-admin-tab]").forEach((el) => {
+    el.style.display = isAdmin ? "" : "none";
+  });
+
+  // Switch to stock tab if current tab is admin-only and user is viewer
+  if (!isAdmin) {
+    const activeTab = document.querySelector(".tab.active");
+    if (activeTab && activeTab.dataset.adminTab) {
+      switchTab("stock", document.querySelector(".tab"));
+    }
+  }
+}
+
+function logoutToViewer() {
+  currentRole = "viewer";
+  sessionStorage.setItem("_sx", "viewer");
+  applyRoleUI();
+  showToast("👁️ Viewer মোডে ফিরে এসেছেন।", "info");
 }
 
 // ===== INIT (Firebase real-time listener) =====
 function init() {
-    // Show loader only now (after login)
-    const loader = document.getElementById('firebaseLoader');
-    if (loader) loader.style.display = 'flex';
+  // Show loader only now (after login)
+  const loader = document.getElementById("firebaseLoader");
+  if (loader) loader.style.display = "flex";
 
-    const dataRef = ref(db, DB_ROOT);
-    onValue(dataRef, (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-            products     = data.products     || [];
-            transactions = data.transactions || [];
-        } else {
-            products = []; transactions = [];
-        }
-        renderAll();
-        setTodayDates();
-        updateCategoryFilter();
-        hideLoader();
-    }, (error) => {
-        console.error('Firebase read error:', error);
-        hideLoader();
-        showToast('❌ Firebase সংযোগে সমস্যা হয়েছে।', 'error');
-        // Still render the empty app so it's usable
-        renderAll();
-        setTodayDates();
-        updateCategoryFilter();
-    });
+  const dataRef = ref(db, DB_ROOT);
+  onValue(
+    dataRef,
+    (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        products = data.products || [];
+        transactions = data.transactions || [];
+      } else {
+        products = [];
+        transactions = [];
+      }
+      renderAll();
+      setTodayDates();
+      updateCategoryFilter();
+      hideLoader();
+    },
+    (error) => {
+      console.error("Firebase read error:", error);
+      hideLoader();
+      showToast("❌ Firebase সংযোগে সমস্যা হয়েছে।", "error");
+      // Still render the empty app so it's usable
+      renderAll();
+      setTodayDates();
+      updateCategoryFilter();
+    },
+  );
 }
 
 function setTodayDates() {
@@ -112,28 +180,35 @@ function loadData() {
 }
 
 function resetAllData() {
-    const passInput = document.getElementById('resetPassword');
-    const errEl = document.getElementById('resetPassError');
-    if (!passInput || !_verifyPwd(passInput.value)) {
-        if (errEl) errEl.style.display = 'block';
-        if (passInput) { passInput.focus(); passInput.select(); }
-        return;
+  const passInput = document.getElementById("resetPassword");
+  const errEl = document.getElementById("resetPassError");
+  if (!passInput || !_verifyPwd(passInput.value)) {
+    if (errEl) errEl.style.display = "block";
+    if (passInput) {
+      passInput.focus();
+      passInput.select();
     }
-    // Delete everything from Firebase
-    remove(ref(db, DB_ROOT))
-        .then(() => {
-            products = []; transactions = [];
-            closeModal('resetModal');
-            if (passInput) passInput.value = '';
-            if (errEl) errEl.style.display = 'none';
-            renderAll();
-            updateCategoryFilter();
-            showToast('✅ সব ডেটা মুছে ফেলা হয়েছে। নতুন রেজিস্টার শুরু হয়েছে।', 'success');
-        })
-        .catch(err => {
-            console.error('Firebase reset error:', err);
-            showToast('❌ রিসেট করতে পারেনি।', 'error');
-        });
+    return;
+  }
+  // Delete everything from Firebase
+  remove(ref(db, DB_ROOT))
+    .then(() => {
+      products = [];
+      transactions = [];
+      closeModal("resetModal");
+      if (passInput) passInput.value = "";
+      if (errEl) errEl.style.display = "none";
+      renderAll();
+      updateCategoryFilter();
+      showToast(
+        "✅ সব ডেটা মুছে ফেলা হয়েছে। নতুন রেজিস্টার শুরু হয়েছে।",
+        "success",
+      );
+    })
+    .catch((err) => {
+      console.error("Firebase reset error:", err);
+      showToast("❌ রিসেট করতে পারেনি।", "error");
+    });
 }
 
 function openModal(id) {
@@ -181,8 +256,9 @@ function stockStatus(p) {
 function renderStock(list) {
   list = list || products;
   const tbody = document.getElementById("stockTableBody");
+  const isAdmin = currentRole === "admin";
   if (!list.length) {
-    tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state"><span class="emoji">📭</span>কোনো পণ্য নেই। "+ নতুন পণ্য" বাটনে ক্লিক করে পণ্য যোগ করুন।</div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="${isAdmin ? 10 : 9}"><div class="empty-state"><span class="emoji">📭</span>কোনো পণ্য নেই।${isAdmin ? ' "+ নতুন পণ্য" বাটনে ক্লিক করে পণ্য যোগ করুন।' : ""}</div></td></tr>`;
     return;
   }
   tbody.innerHTML = list
@@ -194,6 +270,18 @@ function renderStock(list) {
           : p.stock <= p.minStock
             ? "stock-warn"
             : "stock-ok";
+      const actionCell = isAdmin
+        ? `<td class="action-cell">
+                <button class="btn btn-sm btn-success" onclick="quickReceive(${p.id})" title="স্টক গ্রহণ">+IN</button>
+                <button class="btn btn-sm btn-danger" onclick="quickIssue(${p.id})" title="ইস্যু করুন">ISSUE</button>
+                <button class="btn btn-sm btn-edit" onclick="editProduct(${p.id})" title="এডিট করুন">✏️</button>
+                <button class="btn btn-sm btn-ledger" onclick="openLedger(${p.id})" title="ইতিহাস দেখুন">📋</button>
+                <button class="btn btn-sm btn-delete" onclick="deleteProduct(${p.id})" title="স্টক কমান">📉</button>
+                <button class="btn btn-sm btn-full-delete" onclick="fullDeleteProduct(${p.id})" title="সম্পূর্ণ মুছুন">🗑️</button>
+            </td>`
+        : `<td class="action-cell">
+                <button class="btn btn-sm btn-ledger" onclick="openLedger(${p.id})" title="ইতিহাস দেখুন">📋 ইতিহাস</button>
+            </td>`;
       return `<tr>
             <td>${idx + 1}</td>
             <td><strong>${p.name}</strong></td>
@@ -204,14 +292,7 @@ function renderStock(list) {
             <td>${p.lastIn ? formatDate(p.lastIn) : "—"}</td>
             <td>${p.lastIssueTo ? `<span title="${p.lastIssue}">${p.lastIssueTo}</span>` : "—"}</td>
             <td><span class="badge ${st.cls}">${st.label}</span></td>
-            <td class="action-cell">
-                <button class="btn btn-sm btn-success" onclick="quickReceive(${p.id})" title="স্টক গ্রহণ">+IN</button>
-                <button class="btn btn-sm btn-danger" onclick="quickIssue(${p.id})" title="ইস্যু করুন">ISSUE</button>
-                <button class="btn btn-sm btn-edit" onclick="editProduct(${p.id})" title="এডিট করুন">✏️</button>
-                <button class="btn btn-sm btn-ledger" onclick="openLedger(${p.id})" title="ইতিহাস দেখুন">📋</button>
-                <button class="btn btn-sm btn-delete" onclick="deleteProduct(${p.id})" title="স্টক কমান">📉</button>
-                <button class="btn btn-sm btn-full-delete" onclick="fullDeleteProduct(${p.id})" title="সম্পূর্ণ মুছুন">🗑️</button>
-            </td>
+            ${actionCell}
         </tr>`;
     })
     .join("");
@@ -1255,19 +1336,6 @@ window.addEventListener("appinstalled", () => {
 
 // ===== START =====
 window.addEventListener("DOMContentLoaded", () => {
-  // Session persistence — skip login if already authenticated this session
-  if (sessionStorage.getItem("_sx") === "1") {
-    document.getElementById("loginScreen").style.display = "none";
-    document.getElementById("appContent").style.display = "block";
-    init();
-    return;
-  }
-  // Show login
-  setTimeout(() => {
-    const inp = document.getElementById("loginPasswordInput");
-    if (inp) inp.focus();
-  }, 300);
-
   // Register Service Worker
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker
@@ -1275,42 +1343,65 @@ window.addEventListener("DOMContentLoaded", () => {
       .then((reg) => console.log("SW registered:", reg.scope))
       .catch((err) => console.warn("SW registration failed:", err));
   }
+
+  // Session persistence — restore role from sessionStorage
+  const savedRole = sessionStorage.getItem("_sx");
+  if (savedRole === "admin" || savedRole === "1") {
+    currentRole = "admin";
+    document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("appContent").style.display = "block";
+    applyRoleUI();
+    init();
+    return;
+  }
+  if (savedRole === "viewer") {
+    currentRole = "viewer";
+    document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("appContent").style.display = "block";
+    applyRoleUI();
+    init();
+    return;
+  }
+  // Fresh visit — show login screen
 });
 
 // ===== EXPOSE FUNCTIONS TO GLOBAL SCOPE (required for ES module) =====
 // HTML onclick attributes cannot access module-scoped functions directly
 Object.assign(window, {
-    doLogin,
-    init,
-    openModal,
-    closeModal,
-    closeModalOutside,
-    switchTab,
-    filterStock,
-    filterTransactions,
-    updateIssueStock,
-    submitIssue,
-    submitReceive,
-    txnConfirmOK,
-    quickReceive,
-    quickIssue,
-    deleteProduct,
-    confirmPartialDelete,
-    addProduct,
-    exportStockCSV,
-    exportStockPDF,
-    exportTransCSV,
-    exportTransPDF,
-    printStock,
-    printTransactions,
-    resetAllData,
-    editProduct,
-    saveEditProduct,
-    fullDeleteProduct,
-    confirmFullDelete,
-    openLedger,
-    generateReport,
-    exportBackupJSON,
-    importBackupJSON,
-    installPWA,
+  doLogin,
+  enterAsViewer,
+  showAdminLoginForm,
+  logoutToViewer,
+  init,
+  openModal,
+  closeModal,
+  closeModalOutside,
+  switchTab,
+  filterStock,
+  filterTransactions,
+  updateIssueStock,
+  submitIssue,
+  submitReceive,
+  txnConfirmOK,
+  quickReceive,
+  quickIssue,
+  deleteProduct,
+  confirmPartialDelete,
+  addProduct,
+  exportStockCSV,
+  exportStockPDF,
+  exportTransCSV,
+  exportTransPDF,
+  printStock,
+  printTransactions,
+  resetAllData,
+  editProduct,
+  saveEditProduct,
+  fullDeleteProduct,
+  confirmFullDelete,
+  openLedger,
+  generateReport,
+  exportBackupJSON,
+  importBackupJSON,
+  installPWA,
 });

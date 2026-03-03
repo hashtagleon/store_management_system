@@ -29,8 +29,21 @@
         <div class="login-icon">📦</div>
         <h1 class="login-title">বিকেএসপি পাবলিক স্কুল এন্ড কলেজ</h1>
         <p class="login-subtitle">স্টোর ম্যানেজমেন্ট সিস্টেম</p>
-        <div class="login-form">
-          <label class="login-label">🔑 পাসওয়ার্ড</label>
+
+        <!-- Two access options -->
+        <div id="adminLoginToggleSection" class="login-form">
+          <button class="btn btn-primary login-btn" style="margin-bottom:12px;" onclick="enterAsViewer()">
+            👁️ স্টক দেখুন (পাসওয়ার্ড ছাড়া)
+          </button>
+          <div class="login-divider"><span>অথবা</span></div>
+          <button class="btn btn-outline login-btn" onclick="showAdminLoginForm()">
+            🔐 Admin Login
+          </button>
+        </div>
+
+        <!-- Admin password form (hidden by default) -->
+        <div id="adminLoginSection" class="login-form" style="display:none;">
+          <label class="login-label">🔑 Admin পাসওয়ার্ড</label>
           <input
             type="password"
             id="loginPasswordInput"
@@ -39,14 +52,21 @@
             onkeydown="if(event.key==='Enter') doLogin()"
             autocomplete="off"
           />
-          <p id="loginError" class="login-error">❌ পাসওয়ার্ড সঠিক নয়।</p>
+          <p id="loginError" class="login-error" style="display:none;">❌ পাসওয়ার্ড সঠিক নয়।</p>
           <button class="btn btn-primary login-btn" onclick="doLogin()">প্রবেশ করুন →</button>
+          <button class="btn btn-outline login-btn" style="margin-top:8px;" onclick="document.getElementById('adminLoginSection').style.display='none';document.getElementById('adminLoginToggleSection').style.display='block';">← ফিরে যান</button>
         </div>
       </div>
     </div>
 
     <!-- ====== APP CONTENT ====== -->
     <div id="appContent" style="display:none;">
+
+    <!-- Viewer info bar -->
+    <div id="viewerInfoBar" class="viewer-info-bar" style="display:none;">
+      <span>👁️ আপনি <strong>View Only</strong> মোডে আছেন — শুধু দেখতে পারবেন, এডিট করতে পারবেন না।</span>
+      <button class="btn btn-outline btn-sm" onclick="document.getElementById('loginScreen').style.display='flex'; document.getElementById('appContent').style.display='none'; document.getElementById('adminLoginSection').style.display='none'; document.getElementById('adminLoginToggleSection').style.display='block'; sessionStorage.clear();" style="margin-left:12px;font-size:0.78rem;padding:4px 10px;">🔐 Admin Login</button>
+    </div>
 
     <!-- Header -->
     <header class="header">
@@ -59,17 +79,22 @@
           </div>
         </div>
         <div class="header-actions">
+          <span id="roleBadge" class="role-badge"></span>
           <button class="btn btn-outline" onclick="openModal('exportModal')">
             📥 Export / Print
           </button>
-          <button class="btn btn-outline btn-reset-header" onclick="openModal('resetModal')">
+          <button class="btn btn-outline btn-reset-header" onclick="openModal('resetModal')" data-admin-only>
             🔄 রিসেট
           </button>
           <button
             class="btn btn-primary"
             onclick="openModal('addProductModal')"
+            data-admin-only
           >
             + নতুন পণ্য
+          </button>
+          <button class="btn btn-outline" onclick="logoutToViewer()" data-admin-only style="font-size:0.8rem;padding:6px 12px;">
+            👁️ Viewer মোড
           </button>
         </div>
       </div>
@@ -125,10 +150,10 @@
         <button class="tab" onclick="switchTab('transactions', this)">
           📝 লেনদেন ইতিহাস
         </button>
-        <button class="tab" onclick="switchTab('issue', this)">
+        <button class="tab" onclick="switchTab('issue', this)" data-admin-tab>
           🔄 ইস্যু করুন
         </button>
-        <button class="tab" onclick="switchTab('receive', this)">
+        <button class="tab" onclick="switchTab('receive', this)" data-admin-tab>
           📥 মাল গ্রহণ
         </button>
         <button class="tab" onclick="switchTab('report', this)">
@@ -156,7 +181,7 @@
               >
                 <option value="">সব ক্যাটাগরি</option>
               </select>
-              <button class="btn btn-primary" onclick="openModal('addProductModal')">
+              <button class="btn btn-primary" onclick="openModal('addProductModal')" data-admin-only>
                 + নতুন পণ্য যোগ করুন
               </button>
             </div>
