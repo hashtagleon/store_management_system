@@ -33,7 +33,7 @@
         <!-- Two access options -->
         <div id="adminLoginToggleSection" class="login-form">
           <button class="btn btn-primary login-btn" style="margin-bottom:12px;" onclick="enterAsViewer()">
-            👁️ স্টক দেখুন (পাসওয়ার্ড ছাড়া)
+            👁️ স্টক দেখুন
           </button>
           <div class="login-divider"><span>অথবা</span></div>
           <button class="btn btn-outline login-btn" onclick="showAdminLoginForm()">
@@ -158,6 +158,9 @@
         </button>
         <button class="tab" onclick="switchTab('report', this)">
           📊 রিপোর্ট
+        </button>
+        <button class="tab" onclick="switchTab('activitylog', this)" data-admin-tab>
+          📜 কার্যলগ
         </button>
       </div>
 
@@ -468,9 +471,66 @@
           <div id="reportEmpty" style="display:none;" class="empty-state"><span class="emoji">📅</span>নির্বাচিত তারিখে কোনো লেনদেন নেই।</div>
         </div>
       </div>
+      <!-- ====== ACTIVITY LOG TAB ====== -->
+      <div id="tab-activitylog" class="tab-content">
+        <div class="card form-card">
+          <h2 class="card-title">📜 কার্যক্রম লগ</h2>
+          <div class="form-grid" style="margin-bottom:16px;">
+            <div class="form-group">
+              <label>তারিখ দিয়ে ফিল্টার</label>
+              <input type="date" id="alFilterDate" class="form-control" onchange="filterActivityLog()" />
+            </div>
+            <div class="form-group">
+              <label>কার্যক্রম ধরন</label>
+              <select id="alFilterType" class="form-control" onchange="filterActivityLog()">
+                <option value="">সব কার্যক্রম</option>
+                <option value="add_product">➕ পণ্য যোগ</option>
+                <option value="edit_product">✏️ পণ্য এডিট</option>
+                <option value="delete_product">🗑️ পণ্য মুছে ফেলা</option>
+                <option value="issue">📤 ইস্যু</option>
+                <option value="receive">📥 মাল গ্রহণ</option>
+                <option value="stock_reduce">📉 স্টক কমানো</option>
+                <option value="reset">🔄 রিসেট</option>
+                <option value="csv_import">📋 CSV আমদানি</option>
+              </select>
+            </div>
+            <div class="form-group" style="justify-content:flex-end;">
+              <label style="visibility:hidden;">x</label>
+              <button class="btn btn-outline" onclick="document.getElementById('alFilterDate').value='';document.getElementById('alFilterType').value='';filterActivityLog();">❌ ফিল্টার বাতিল</button>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead><tr><th>#</th><th>তারিখ ও সময়</th><th>কার্যক্রম</th><th>বিবরণ</th></tr></thead>
+              <tbody id="activityLogBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- Export / Print Modal -->
+    <!-- ====== CSV PREVIEW MODAL ====== -->
+    <div id="csvPreviewModal" class="modal-overlay" onclick="closeModalOutside(event,'csvPreviewModal')">
+      <div class="modal" style="max-width:800px;">
+        <div class="modal-header">
+          <div>
+            <h3>📋 CSV Preview — <span id="csvPreviewCount">0</span>টি পণ্য</h3>
+          </div>
+          <button class="modal-close" onclick="closeModal('csvPreviewModal')">&#x2715;</button>
+        </div>
+        <p id="csvDupWarning" style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);border-radius:8px;padding:10px 14px;font-size:0.82rem;color:#fbbf24;margin-bottom:12px;display:none;"></p>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead><tr><th>#</th><th>পণ্যের নাম</th><th>ক্যাটাগরি</th><th>একক</th><th>প্রারম্ভিক স্টক</th><th>ন্যূনতম স্টক</th></tr></thead>
+            <tbody id="csvPreviewBody"></tbody>
+          </table>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-outline" onclick="closeModal('csvPreviewModal')">&#x2715; বাতিল</button>
+          <button class="btn btn-primary" onclick="confirmCSVImport()">✓ Import নিশ্চিত করুন</button>
+        </div>
+      </div>
+    </div>
     <div id="exportModal" class="modal-overlay" onclick="closeModalOutside(event, 'exportModal')">
       <div class="modal" style="max-width:480px;">
         <div class="modal-header">
@@ -523,8 +583,22 @@
           </div>
           <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="importBackupJSON(event)" />
         </div>
+
+        <hr class="export-divider"/>
+
+        <!-- Bulk CSV Import -->
+        <div class="export-section" data-admin-only>
+          <h4 class="export-section-title">📋 Bulk CSV Import</h4>
+          <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:12px;">CSV ফাইল থেকে একসাথে অনেক পণ্য আমদানি করুন।</p>
+          <div class="export-btns">
+            <button class="btn btn-outline export-btn" onclick="downloadCSVTemplate()">⬇️ Template ডাউনলোড</button>
+            <button class="btn btn-primary export-btn" onclick="document.getElementById('csvImportInput').click()">📂 CSV আপলোড করুন</button>
+          </div>
+          <input type="file" id="csvImportInput" accept=".csv" style="display:none" onchange="importCSVFile(event)" />
+        </div>
       </div>
     </div>
+
 
     <!-- Transaction Confirmation Modal -->
     <div id="txnConfirmModal" class="modal-overlay">

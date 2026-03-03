@@ -27,6 +27,7 @@ const DB_ROOT = "bksp_store"; // Firebase-এর root key
 // ===== DATA STORE =====
 let products = [];
 let transactions = [];
+let activityLog = [];
 
 // Hide the loading overlay
 function hideLoader() {
@@ -138,11 +139,12 @@ function init() {
       if (data) {
         products = data.products || [];
         transactions = data.transactions || [];
+        activityLog = data.activityLog || [];
       } else {
-        products = [];
-        transactions = [];
+        products = []; transactions = []; activityLog = [];
       }
       renderAll();
+      renderActivityLog();
       setTodayDates();
       updateCategoryFilter();
       hideLoader();
@@ -151,13 +153,14 @@ function init() {
       console.error("Firebase read error:", error);
       hideLoader();
       showToast("❌ Firebase সংযোগে সমস্যা হয়েছে।", "error");
-      // Still render the empty app so it's usable
       renderAll();
+      renderActivityLog();
       setTodayDates();
       updateCategoryFilter();
     },
   );
 }
+
 
 function setTodayDates() {
   const today = new Date().toISOString().split("T")[0];
@@ -169,7 +172,7 @@ function setTodayDates() {
 
 // ===== STORAGE (Firebase) =====
 function saveData() {
-  const payload = { products, transactions };
+  const payload = { products, transactions, activityLog };
   set(ref(db, DB_ROOT), payload)
     .then(() => updateLastSaved())
     .catch((err) => console.error("Firebase save error:", err));
@@ -177,6 +180,190 @@ function saveData() {
 
 function loadData() {
   // Not used anymore — Firebase uses real-time listener in init()
+}
+
+// ===== ACTIVITY LOG =====
+function logActivity(action, details) {
+  if (currentRole !== 'admin') return;
+  activityLog.push({
+    id: Date.now(),
+    timestamp: new Date().toISOString(),
+    action,
+    details,
+  });
+  // Keep only last 500 entries
+  if (activityLog.length > 500) activityLog = activityLog.slice(-500);
+}
+
+const ACTION_META = {
+  add_product:    { icon: '➕', label: 'পণ্য যোগ',       cls: 'al-add' },
+  edit_product:   { icon: '✏️', label: 'পণ্য এডিট',      cls: 'al-edit' },
+  delete_product: { icon: '🗑️', label: 'পণ্য মুছে ফেলা', cls: 'al-delete' },
+  stock_reduce:   { icon: '📉', label: 'স্টক কমানো',     cls: 'al-reduce' },
+  issue:          { icon: '📤', label: 'ইস্যু',            cls: 'al-issue' },
+  receive:        { icon: '📥', label: 'মাল গ্রহণ',       cls: 'al-receive' },
+  reset:          { icon: '🔄', label: 'রিসেট',            cls: 'al-reset' },
+  csv_import:     { icon: '📋', label: 'CSV আমদানি',      cls: 'al-import' },
+};
+
+function renderActivityLog(list) {
+  list = list || activityLog;
+  const tbody = document.getElementById('activityLogBody');
+  if (!tbody) return;
+  const sorted = [...list].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+  if (!sorted.length) {
+    tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><span class="emoji">📜</span>কোনো কার্যক্রম লগ নেই।</div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = sorted.map((entry, i) => {
+    const meta = ACTION_META[entry.action] || { icon: '•', label: entry.action, cls: '' };
+    return `<tr>
+      <td>${sorted.length - i}</td>
+      <td>${formatDateTime(entry.timestamp)}</td>
+      <td><span class="al-badge ${meta.cls}">${meta.icon} ${meta.label}</span></td>
+      <td>${entry.details}</td>
+    </tr>`;
+  }).join('');
+}
+
+function filterActivityLog() {
+  const dateVal = document.getElementById('alFilterDate')?.value;
+  const typeVal = document.getElementById('alFilterType')?.value;
+  let list = activityLog;
+  if (dateVal) list = list.filter(e => e.timestamp.startsWith(dateVal));
+  if (typeVal) list = list.filter(e => e.action === typeVal);
+  renderActivityLog(list);
+}
+
+// ===== BULK CSV IMPORT =====
+let _csvPreviewData = [];
+
+function downloadCSVTemplate() {
+  const csv = "\uFEFF" + [
+    "পণ্যের নাম,ক্যাটাগরি,একক,প্রারম্ভিক স্টক,ন্যূনতম স্টক",
+    "কলম,স্টেশনারি,পিস,100,10",
+    "সাদা কাগজ (A4),স্টেশনারি,রিম,50,5",
+    "মার্কার,স্টেশনারি,পিস,30,5",
+  ].join("\n");
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'product_import_template.csv';
+  a.click();
+  showToast('📋 Template CSV ডাউনলোড হচ্ছে!', 'success');
+}
+
+function importCSVFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const text = e.target.result;
+      const lines = text.split(/\r?\n/).filter(l => l.trim());
+      if (lines.length < 2) return showToast('❌ CSV ফাইলে কোনো ডেটা নেই।', 'error');
+      // Strip BOM if present
+      const header = lines[0].replace(/^\uFEFF/, '');
+      const rows = [];
+      for (let i = 1; i < lines.length; i++) {
+        const cols = lines[i].split(',').map(c => c.trim().replace(/^"|"$/g, ''));
+        if (cols.length < 3 || !cols[0]) continue;
+        rows.push({
+          name: cols[0] || '',
+          category: cols[1] || 'সাধারণ',
+          unit: cols[2] || 'পিস',
+          stock: parseInt(cols[3]) || 0,
+          minStock: parseInt(cols[4]) || 10,
+        });
+      }
+      if (!rows.length) return showToast('❌ কোনো বৈধ পণ্য পাওয়া যায়নি।', 'error');
+      _csvPreviewData = rows;
+      previewCSVData(rows);
+    } catch (err) {
+      showToast('❌ CSV পড়তে পারেনি। ফাইল চেক করুন।', 'error');
+    }
+    event.target.value = '';
+  };
+  reader.readAsText(file, 'utf-8');
+}
+
+function previewCSVData(rows) {
+  const tbody = document.getElementById('csvPreviewBody');
+  const countEl = document.getElementById('csvPreviewCount');
+  const dupEl = document.getElementById('csvDupWarning');
+  if (!tbody) return;
+  const existing = new Set(products.map(p => p.name.toLowerCase()));
+  const dups = rows.filter(r => existing.has(r.name.toLowerCase()));
+  if (countEl) countEl.textContent = rows.length;
+  if (dupEl) {
+    if (dups.length) {
+      dupEl.textContent = `⚠️ ${dups.length}টি পণ্য ইতিমধ্যে আছে, সেগুলো skip হবে: ${dups.map(d=>d.name).join(', ')}`;
+      dupEl.style.display = 'block';
+    } else {
+      dupEl.style.display = 'none';
+    }
+  }
+  tbody.innerHTML = rows.map((r, i) => {
+    const isDup = existing.has(r.name.toLowerCase());
+    return `<tr class="${isDup ? 'csv-dup-row' : ''}">
+      <td>${i+1}</td>
+      <td>${r.name}${isDup ? ' <span style="color:#f87171;font-size:0.75rem">(ডুপ্লিকেট)</span>' : ''}</td>
+      <td>${r.category}</td>
+      <td>${r.unit}</td>
+      <td>${r.stock}</td>
+      <td>${r.minStock}</td>
+    </tr>`;
+  }).join('');
+  openModal('csvPreviewModal');
+}
+
+function confirmCSVImport() {
+  if (!_csvPreviewData.length) return;
+  const existing = new Set(products.map(p => p.name.toLowerCase()));
+  const newRows = _csvPreviewData.filter(r => !existing.has(r.name.toLowerCase()));
+  if (!newRows.length) {
+    showToast('❌ সব পণ্য ইতিমধ্যে আছে, কিছু import হয়নি।', 'error');
+    closeModal('csvPreviewModal');
+    return;
+  }
+  const now = new Date().toISOString().slice(0, 16);
+  let nextId = products.length ? Math.max(...products.map(p => p.id)) + 1 : 1;
+  newRows.forEach(r => {
+    products.push({
+      id: nextId++,
+      name: r.name,
+      category: r.category,
+      unit: r.unit,
+      stock: r.stock,
+      minStock: r.minStock,
+      lastIn: r.stock > 0 ? now : null,
+      lastIssue: null,
+      lastIssueTo: null,
+      createdAt: now,
+    });
+    if (r.stock > 0) {
+      transactions.push({
+        id: Date.now() + nextId,
+        type: 'in',
+        productId: nextId - 1,
+        productName: r.name,
+        unit: r.unit,
+        qty: r.stock,
+        person: 'CSV আমদানি',
+        dept: '',
+        note: 'Bulk Import',
+        date: now,
+      });
+    }
+  });
+  logActivity('csv_import', `CSV থেকে ${newRows.length}টি পণ্য আমদানি করা হয়েছে`);
+  saveData();
+  renderAll();
+  updateCategoryFilter();
+  closeModal('csvPreviewModal');
+  closeModal('exportModal');
+  _csvPreviewData = [];
+  showToast(`✅ ${newRows.length}টি পণ্য সফলভাবে আমদানি হয়েছে!`, 'success');
 }
 
 function resetAllData() {
@@ -191,14 +378,17 @@ function resetAllData() {
     return;
   }
   // Delete everything from Firebase
+  logActivity('reset', '\u09b8\u09ae\u09b8\u09cd\u09a4 \u09a1\u09c7\u099f\u09be \u09b0\u09bf\u09b8\u09c7\u099f \u0995\u09b0\u09be \u09b9\u09af\u09bc\u09c7\u099b\u09c7');
   remove(ref(db, DB_ROOT))
     .then(() => {
       products = [];
       transactions = [];
+      activityLog = [];
       closeModal("resetModal");
       if (passInput) passInput.value = "";
       if (errEl) errEl.style.display = "none";
       renderAll();
+      renderActivityLog();
       updateCategoryFilter();
       showToast(
         "✅ সব ডেটা মুছে ফেলা হয়েছে। নতুন রেজিস্টার শুরু হয়েছে।",
@@ -210,6 +400,7 @@ function resetAllData() {
       showToast("❌ রিসেট করতে পারেনি।", "error");
     });
 }
+
 
 function openModal(id) {
   document.getElementById(id).classList.add("open");
@@ -422,6 +613,7 @@ function submitIssue(e) {
     date: date + "T" + new Date().toTimeString().slice(0, 5),
   });
 
+  logActivity('issue', `${p.name} — ${qty} ${p.unit} ইস্যু → ${name}${dept ? ' (' + dept + ')' : ''}`);
   saveData();
   renderAll();
   e.target.reset();
@@ -463,6 +655,7 @@ function submitReceive(e) {
     date: date + "T" + new Date().toTimeString().slice(0, 5),
   });
 
+  logActivity('receive', `${p.name} — ${qty} ${p.unit} গ্রহণ${supplier ? ' (সরবরাহকারী: ' + supplier + ')' : ''}`);
   saveData();
   renderAll();
   e.target.reset();
@@ -561,6 +754,7 @@ function confirmPartialDelete() {
     date: new Date().toISOString().slice(0, 16),
   });
 
+  logActivity('stock_reduce', `${p.name} — ${qty} ${p.unit} কমানো হয়েছে (কারণ: ${reason || 'ম্যানুয়াল সমন্বয়'})`);
   saveData();
   renderAll();
   closeModal("deleteStockModal");
@@ -611,6 +805,7 @@ function addProduct(e) {
     });
   }
 
+  logActivity('add_product', `"${name}" পণ্য যোগ করা হয়েছে (জমা: ${stock} ${unit}, ক্যাটাগরি: ${category})`);
   saveData();
   renderAll();
   updateCategoryFilter();
@@ -921,6 +1116,7 @@ function saveEditProduct(e) {
       if (t.productId === id) t.productName = newName;
     });
   }
+  logActivity('edit_product', `"${oldName}"${oldName !== newName ? ' → "' + newName + '"' : ''} এডিট করা হয়েছে`);
   saveData();
   renderAll();
   updateCategoryFilter();
@@ -964,6 +1160,7 @@ function confirmFullDelete() {
     (t) => t.productId !== _fullDeleteTargetId,
   );
   _fullDeleteTargetId = null;
+  logActivity('delete_product', `"${name}" পণ্য সম্পূর্ণভাবে মুছে ফেলা হয়েছে`);
   saveData();
   renderAll();
   updateCategoryFilter();
@@ -1404,4 +1601,8 @@ Object.assign(window, {
   exportBackupJSON,
   importBackupJSON,
   installPWA,
+  filterActivityLog,
+  downloadCSVTemplate,
+  importCSVFile,
+  confirmCSVImport,
 });
