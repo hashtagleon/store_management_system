@@ -1,5 +1,5 @@
 // ===== FIREBASE CONFIG =====
-// ⬇️ Firebase console থেকে আপনার config এখানে paste করুন
+// <i class="ph ph-download-simple"></i> Firebase console থেকে আপনার config এখানে paste করুন
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   getDatabase,
@@ -92,7 +92,7 @@ function applyRoleUI() {
   const badge = document.getElementById("roleBadge");
   const viewerBar = document.getElementById("viewerInfoBar");
   if (badge) {
-    badge.textContent = isAdmin ? "🔐 Super Admin" : "👁️ View Only";
+    badge.textContent = isAdmin ? "<i class="ph ph-lock-key"></i> Super Admin" : "<i class="ph ph-eye"></i> View Only";
     badge.className = isAdmin
       ? "role-badge role-admin"
       : "role-badge role-viewer";
@@ -122,7 +122,7 @@ function logoutToViewer() {
   currentRole = "viewer";
   sessionStorage.setItem("_sx", "viewer");
   applyRoleUI();
-  showToast("👁️ Viewer মোডে ফিরে এসেছেন।", "info");
+  showToast("<i class="ph ph-eye"></i> Viewer মোডে ফিরে এসেছেন।", "info");
 }
 
 // ===== INIT (Firebase real-time listener) =====
@@ -154,7 +154,7 @@ function init() {
     (error) => {
       console.error("Firebase read error:", error);
       hideLoader();
-      showToast("❌ Firebase সংযোগে সমস্যা হয়েছে।", "error");
+      showToast("<i class="ph ph-x-circle"></i> Firebase সংযোগে সমস্যা হয়েছে।", "error");
       renderAll();
       renderActivityLog();
       setTodayDates();
@@ -197,14 +197,14 @@ function logActivity(action, details) {
 }
 
 const ACTION_META = {
-  add_product: { icon: "➕", label: "পণ্য যোগ", cls: "al-add" },
-  edit_product: { icon: "✏️", label: "পণ্য এডিট", cls: "al-edit" },
-  delete_product: { icon: "🗑️", label: "পণ্য মুছে ফেলা", cls: "al-delete" },
-  stock_reduce: { icon: "📉", label: "স্টক কমানো", cls: "al-reduce" },
-  issue: { icon: "📤", label: "ইস্যু", cls: "al-issue" },
-  receive: { icon: "📥", label: "মাল গ্রহণ", cls: "al-receive" },
-  reset: { icon: "🔄", label: "রিসেট", cls: "al-reset" },
-  csv_import: { icon: "📋", label: "CSV আমদানি", cls: "al-import" },
+  add_product: { icon: "<i class="ph ph-plus"></i>", label: "পণ্য যোগ", cls: "al-add" },
+  edit_product: { icon: "<i class="ph ph-pencil-simple"></i>", label: "পণ্য এডিট", cls: "al-edit" },
+  delete_product: { icon: "<i class="ph ph-trash"></i>", label: "পণ্য মুছে ফেলা", cls: "al-delete" },
+  stock_reduce: { icon: "<i class="ph ph-trend-down"></i>", label: "স্টক কমানো", cls: "al-reduce" },
+  issue: { icon: "<i class="ph ph-upload-simple"></i>", label: "ইস্যু", cls: "al-issue" },
+  receive: { icon: "<i class="ph ph-download-simple"></i>", label: "মাল গ্রহণ", cls: "al-receive" },
+  reset: { icon: "<i class="ph ph-arrows-clockwise"></i>", label: "রিসেট", cls: "al-reset" },
+  csv_import: { icon: "<i class="ph ph-clipboard-text"></i>", label: "CSV আমদানি", cls: "al-import" },
 };
 
 function renderActivityLog(list) {
@@ -215,7 +215,7 @@ function renderActivityLog(list) {
     (a, b) => new Date(b.timestamp) - new Date(a.timestamp),
   );
   if (!sorted.length) {
-    tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><span class="emoji">📜</span>কোনো কার্যক্রম লগ নেই।</div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><span class="emoji"><i class="ph ph-scroll"></i></span>কোনো কার্যক্রম লগ নেই।</div></td></tr>`;
     return;
   }
   tbody.innerHTML = sorted
@@ -261,7 +261,7 @@ function downloadCSVTemplate() {
   a.href = URL.createObjectURL(blob);
   a.download = "product_import_template.csv";
   a.click();
-  showToast("📋 Template CSV ডাউনলোড হচ্ছে!", "success");
+  showToast("<i class="ph ph-clipboard-text"></i> Template CSV ডাউনলোড হচ্ছে!", "success");
 }
 
 function importCSVFile(event) {
@@ -273,7 +273,7 @@ function importCSVFile(event) {
       const text = e.target.result;
       const lines = text.split(/\r?\n/).filter((l) => l.trim());
       if (lines.length < 2)
-        return showToast("❌ CSV ফাইলে কোনো ডেটা নেই।", "error");
+        return showToast("<i class="ph ph-x-circle"></i> CSV ফাইলে কোনো ডেটা নেই।", "error");
       // Strip BOM if present
       const header = lines[0].replace(/^\uFEFF/, "");
       const rows = [];
@@ -291,11 +291,11 @@ function importCSVFile(event) {
         });
       }
       if (!rows.length)
-        return showToast("❌ কোনো বৈধ পণ্য পাওয়া যায়নি।", "error");
+        return showToast("<i class="ph ph-x-circle"></i> কোনো বৈধ পণ্য পাওয়া যায়নি।", "error");
       _csvPreviewData = rows;
       previewCSVData(rows);
     } catch (err) {
-      showToast("❌ CSV পড়তে পারেনি। ফাইল চেক করুন।", "error");
+      showToast("<i class="ph ph-x-circle"></i> CSV পড়তে পারেনি। ফাইল চেক করুন।", "error");
     }
     event.target.value = "";
   };
@@ -312,7 +312,7 @@ function previewCSVData(rows) {
   if (countEl) countEl.textContent = rows.length;
   if (dupEl) {
     if (dups.length) {
-      dupEl.textContent = `⚠️ ${dups.length}টি পণ্য ইতিমধ্যে আছে, সেগুলো skip হবে: ${dups.map((d) => d.name).join(", ")}`;
+      dupEl.textContent = `<i class="ph ph-warning"></i> ${dups.length}টি পণ্য ইতিমধ্যে আছে, সেগুলো skip হবে: ${dups.map((d) => d.name).join(", ")}`;
       dupEl.style.display = "block";
     } else {
       dupEl.style.display = "none";
@@ -341,7 +341,7 @@ function confirmCSVImport() {
     (r) => !existing.has(r.name.toLowerCase()),
   );
   if (!newRows.length) {
-    showToast("❌ সব পণ্য ইতিমধ্যে আছে, কিছু import হয়নি।", "error");
+    showToast("<i class="ph ph-x-circle"></i> সব পণ্য ইতিমধ্যে আছে, কিছু import হয়নি।", "error");
     closeModal("csvPreviewModal");
     return;
   }
@@ -385,7 +385,7 @@ function confirmCSVImport() {
   closeModal("csvPreviewModal");
   closeModal("exportModal");
   _csvPreviewData = [];
-  showToast(`✅ ${newRows.length}টি পণ্য সফলভাবে আমদানি হয়েছে!`, "success");
+  showToast(`<i class="ph ph-check-circle"></i> ${newRows.length}টি পণ্য সফলভাবে আমদানি হয়েছে!`, "success");
 }
 
 function resetAllData() {
@@ -416,13 +416,13 @@ function resetAllData() {
       renderActivityLog();
       updateCategoryFilter();
       showToast(
-        "✅ সব ডেটা মুছে ফেলা হয়েছে। নতুন রেজিস্টার শুরু হয়েছে।",
+        "<i class="ph ph-check-circle"></i> সব ডেটা মুছে ফেলা হয়েছে। নতুন রেজিস্টার শুরু হয়েছে।",
         "success",
       );
     })
     .catch((err) => {
       console.error("Firebase reset error:", err);
-      showToast("❌ রিসেট করতে পারেনি।", "error");
+      showToast("<i class="ph ph-x-circle"></i> রিসেট করতে পারেনি।", "error");
     });
 }
 
@@ -463,9 +463,9 @@ function updateStats() {
 }
 
 function stockStatus(p) {
-  if (p.stock === 0) return { label: "❌ শেষ", cls: "badge-danger" };
-  if (p.stock <= p.minStock) return { label: "⚠️ কম", cls: "badge-warning" };
-  return { label: "✅ ভালো", cls: "badge-success" };
+  if (p.stock === 0) return { label: "<i class="ph ph-x-circle"></i> শেষ", cls: "badge-danger" };
+  if (p.stock <= p.minStock) return { label: "<i class="ph ph-warning"></i> কম", cls: "badge-warning" };
+  return { label: "<i class="ph ph-check-circle"></i> ভালো", cls: "badge-success" };
 }
 
 function renderStock(list) {
@@ -473,7 +473,7 @@ function renderStock(list) {
   const tbody = document.getElementById("stockTableBody");
   const isAdmin = currentRole === "admin";
   if (!list.length) {
-    tbody.innerHTML = `<tr><td colspan="${isAdmin ? 10 : 9}"><div class="empty-state"><span class="emoji">📭</span>কোনো পণ্য নেই।${isAdmin ? ' "+ নতুন পণ্য" বাটনে ক্লিক করে পণ্য যোগ করুন।' : ""}</div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="${isAdmin ? 10 : 9}"><div class="empty-state"><span class="emoji"><i class="ph ph-mailbox"></i></span>কোনো পণ্য নেই।${isAdmin ? ' "+ নতুন পণ্য" বাটনে ক্লিক করে পণ্য যোগ করুন।' : ""}</div></td></tr>`;
     return;
   }
   tbody.innerHTML = list
@@ -489,13 +489,13 @@ function renderStock(list) {
         ? `<td class="action-cell">
                 <button class="btn btn-sm btn-success" onclick="quickReceive(${p.id})" title="স্টক গ্রহণ">+IN</button>
                 <button class="btn btn-sm btn-danger" onclick="quickIssue(${p.id})" title="ইস্যু করুন">ISSUE</button>
-                <button class="btn btn-sm btn-edit" onclick="editProduct(${p.id})" title="এডিট করুন">✏️</button>
-                <button class="btn btn-sm btn-ledger" onclick="openLedger(${p.id})" title="ইতিহাস দেখুন">📋</button>
-                <button class="btn btn-sm btn-delete" onclick="deleteProduct(${p.id})" title="স্টক কমান">📉</button>
-                <button class="btn btn-sm btn-full-delete" onclick="fullDeleteProduct(${p.id})" title="সম্পূর্ণ মুছুন">🗑️</button>
+                <button class="btn btn-sm btn-edit" onclick="editProduct(${p.id})" title="এডিট করুন"><i class="ph ph-pencil-simple"></i></button>
+                <button class="btn btn-sm btn-ledger" onclick="openLedger(${p.id})" title="ইতিহাস দেখুন"><i class="ph ph-clipboard-text"></i></button>
+                <button class="btn btn-sm btn-delete" onclick="deleteProduct(${p.id})" title="স্টক কমান"><i class="ph ph-trend-down"></i></button>
+                <button class="btn btn-sm btn-full-delete" onclick="fullDeleteProduct(${p.id})" title="সম্পূর্ণ মুছুন"><i class="ph ph-trash"></i></button>
             </td>`
         : `<td class="action-cell">
-                <button class="btn btn-sm btn-ledger" onclick="openLedger(${p.id})" title="ইতিহাস দেখুন">📋 ইতিহাস</button>
+                <button class="btn btn-sm btn-ledger" onclick="openLedger(${p.id})" title="ইতিহাস দেখুন"><i class="ph ph-clipboard-text"></i> ইতিহাস</button>
             </td>`;
       return `<tr>
             <td>${idx + 1}</td>
@@ -517,7 +517,7 @@ function renderTransactions(list) {
   list = list || transactions;
   const tbody = document.getElementById("transTableBody");
   if (!list.length) {
-    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><span class="emoji">📋</span>কোনো লেনদেন নেই</div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><span class="emoji"><i class="ph ph-clipboard-text"></i></span>কোনো লেনদেন নেই</div></td></tr>`;
     return;
   }
   const sorted = [...list].sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -526,7 +526,7 @@ function renderTransactions(list) {
       (t, i) => `<tr>
         <td>${sorted.length - i}</td>
         <td>${formatDateTime(t.date)}</td>
-        <td><span class="badge badge-${t.type}">${t.type === "in" ? "📥 IN" : "📤 ISSUE"}</span></td>
+        <td><span class="badge badge-${t.type}">${t.type === "in" ? "<i class="ph ph-download-simple"></i> IN" : "<i class="ph ph-upload-simple"></i> ISSUE"}</span></td>
         <td>${t.productName}</td>
         <td><strong>${t.qty} ${t.unit}</strong></td>
         <td>${t.person || "—"}</td>
@@ -646,7 +646,7 @@ function submitIssue(e) {
   e.target.reset();
   setTodayDates();
   showTxnConfirm(
-    "📤 ইস্যু সম্পন্ন!",
+    "<i class="ph ph-upload-simple"></i> ইস্যু সম্পন্ন!",
     `<strong>${qty} ${p.unit}</strong> <em>${p.name}</em><br/>প্রাপক: <strong>${name}</strong>${dept ? "<br/>বিভাগ: " + dept : ""}${purpose ? " / " + purpose : ""}<br/>তারিখ: ${date}<br/>অবশিষ্ট স্টক: <strong>${p.stock} ${p.unit}</strong>`,
     "issue",
   );
@@ -691,7 +691,7 @@ function submitReceive(e) {
   e.target.reset();
   setTodayDates();
   showTxnConfirm(
-    "📥 মাল গ্রহণ সম্পন্ন!",
+    "<i class="ph ph-download-simple"></i> মাল গ্রহণ সম্পন্ন!",
     `<strong>${qty} ${p.unit}</strong> <em>${p.name}</em> গ্রহণ করা হয়েছে।${supplier ? "<br/>সরবরাহকারী: <strong>" + supplier + "</strong>" : ""}${invoice ? "<br/>ইনভয়েস: " + invoice : ""}<br/>তারিখ: ${date}<br/>মোট স্টক: <strong>${p.stock} ${p.unit}</strong>`,
     "in",
   );
@@ -700,7 +700,7 @@ function submitReceive(e) {
 // ===== TXN CONFIRM =====
 function showTxnConfirm(title, body, type) {
   document.getElementById("txnConfirmIcon").textContent =
-    type === "in" ? "📥" : "📤";
+    type === "in" ? "<i class="ph ph-download-simple"></i>" : "<i class="ph ph-upload-simple"></i>";
   document.getElementById("txnConfirmTitle").textContent = title;
   document.getElementById("txnConfirmBody").innerHTML = body;
   document.getElementById("txnConfirmModal").classList.add("open");
@@ -791,7 +791,7 @@ function confirmPartialDelete() {
   saveData();
   renderAll();
   closeModal("deleteStockModal");
-  showToast(`✅ "${p.name}" থেকে ${qty} ${p.unit} কমানো হয়েছে।`, "success");
+  showToast(`<i class="ph ph-check-circle"></i> "${p.name}" থেকে ${qty} ${p.unit} কমানো হয়েছে।`, "success");
 }
 
 // ===== ADD PRODUCT =====
@@ -847,7 +847,7 @@ function addProduct(e) {
   updateCategoryFilter();
   closeModal("addProductModal");
   e.target.reset();
-  showToast(`✅ "${name}" সফলভাবে যোগ করা হয়েছে।`, "success");
+  showToast(`<i class="ph ph-check-circle"></i> "${name}" সফলভাবে যোগ করা হয়েছে।`, "success");
 }
 
 // ===== EXPORT =====
@@ -888,7 +888,7 @@ function exportStockCSV() {
     `stock_register_${new Date().toISOString().slice(0, 10)}.csv`,
   );
   closeModal("exportModal");
-  showToast("📥 স্টক CSV ডাউনলোড হচ্ছে!", "success");
+  showToast("<i class="ph ph-download-simple"></i> স্টক CSV ডাউনলোড হচ্ছে!", "success");
 }
 
 function exportTransCSV() {
@@ -937,7 +937,7 @@ function exportTransCSV() {
     `transactions${suffix}_${new Date().toISOString().slice(0, 10)}.csv`,
   );
   closeModal("exportModal");
-  showToast(`📥 ${list.length}টি লেনদেন CSV ডাউনলোড হচ্ছে!`, "success");
+  showToast(`<i class="ph ph-download-simple"></i> ${list.length}টি লেনদেন CSV ডাউনলোড হচ্ছে!`, "success");
 }
 
 function printStock() {
@@ -985,8 +985,8 @@ function printTransactions() {
     .map((t, i) => {
       const type =
         t.type === "in"
-          ? '<span style="color:#10b981">📥 IN</span>'
-          : '<span style="color:#ef4444">📤 ISSUE</span>';
+          ? '<span style="color:#10b981"><i class="ph ph-download-simple"></i> IN</span>'
+          : '<span style="color:#ef4444"><i class="ph ph-upload-simple"></i> ISSUE</span>';
       return `<tr><td>${list.length - i}</td><td>${t.date.replace("T", " ")}</td><td>${type}</td><td>${t.productName}</td><td>${t.qty} ${t.unit}</td><td>${t.person || "—"}</td><td>${t.dept || "—"}</td><td>${t.note || "—"}</td></tr>`;
     })
     .join("");
@@ -1109,7 +1109,7 @@ function updateLowStockBanner() {
         .slice(0, 3)
         .join(", ")}${lowStock.length > 3 ? "..." : ""})`,
     );
-  text.textContent = "⚠️ সতর্কতা: " + parts.join(" | ");
+  text.textContent = "<i class="ph ph-warning"></i> সতর্কতা: " + parts.join(" | ");
   banner.style.display = "block";
 }
 
@@ -1160,7 +1160,7 @@ function saveEditProduct(e) {
   renderAll();
   updateCategoryFilter();
   closeModal("editProductModal");
-  showToast(`✅ "${newName}" সফলভাবে আপডেট হয়েছে।`, "success");
+  showToast(`<i class="ph ph-check-circle"></i> "${newName}" সফলভাবে আপডেট হয়েছে।`, "success");
 }
 
 // ===== FULL PRODUCT DELETE =====
@@ -1204,7 +1204,7 @@ function confirmFullDelete() {
   renderAll();
   updateCategoryFilter();
   closeModal("fullDeleteModal");
-  showToast(`🗑️ "${name}" সম্পূর্ণভাবে মুছে ফেলা হয়েছে।`, "success");
+  showToast(`<i class="ph ph-trash"></i> "${name}" সম্পূর্ণভাবে মুছে ফেলা হয়েছে।`, "success");
 }
 
 // ===== PRODUCT LEDGER =====
@@ -1215,7 +1215,7 @@ function openLedger(id) {
     (a, b) => new Date(b.date) - new Date(a.date),
   );
   document.getElementById("ledgerTitle").textContent =
-    "📦 " + p.name + " — ইতিহাস";
+    "<i class="ph ph-package"></i> " + p.name + " — ইতিহাস";
   document.getElementById("ledgerSubtitle").textContent =
     `ক্যাটাগরি: ${p.category} | একক: ${p.unit} | বর্তমান স্টক: ${p.stock}`;
   const totalIn = pTxns
@@ -1243,7 +1243,7 @@ function openLedger(id) {
         (t, i) => `<tr>
             <td>${pTxns.length - i}</td>
             <td>${formatDateTime(t.date)}</td>
-            <td><span class="badge badge-${t.type}">${t.type === "in" ? "📥 IN" : "📤 ISSUE"}</span></td>
+            <td><span class="badge badge-${t.type}">${t.type === "in" ? "<i class="ph ph-download-simple"></i> IN" : "<i class="ph ph-upload-simple"></i> ISSUE"}</span></td>
             <td><strong>${t.qty} ${t.unit}</strong></td>
             <td>${t.person || "—"}</td>
             <td>${t.dept || "—"}</td>
@@ -1316,7 +1316,7 @@ function updateLastSaved() {
   const el = document.getElementById("lastSavedLabel");
   if (!el) return;
   const now = new Date();
-  el.textContent = `💾 সর্বশেষ সেভ: ${now.toLocaleTimeString("bn-BD", { hour: "2-digit", minute: "2-digit" })}`;
+  el.textContent = `<i class="ph ph-floppy-disk"></i> সর্বশেষ সেভ: ${now.toLocaleTimeString("bn-BD", { hour: "2-digit", minute: "2-digit" })}`;
 }
 
 // saveData already calls updateLastSaved() via .then() above
@@ -1391,7 +1391,7 @@ function exportStockPDF() {
     );
     doc.save(`stock_register_${new Date().toISOString().slice(0, 10)}.pdf`);
     closeModal("exportModal");
-    showToast("📕 Stock PDF ডাউনলোড হচ্ছে!", "success");
+    showToast("<i class="ph ph-file-pdf"></i> Stock PDF ডাউনলোড হচ্ছে!", "success");
   } catch (e) {
     showToast("PDF তৈরি করতে পারেনি। ইন্টারনেট সংযোগ চেক করুন।", "error");
     console.error(e);
@@ -1472,7 +1472,7 @@ function exportTransPDF() {
       `transactions${suffix}_${new Date().toISOString().slice(0, 10)}.pdf`,
     );
     closeModal("exportModal");
-    showToast(`📕 ${list.length}টি Transaction PDF ডাউনলোড হচ্ছে!`, "success");
+    showToast(`<i class="ph ph-file-pdf"></i> ${list.length}টি Transaction PDF ডাউনলোড হচ্ছে!`, "success");
   } catch (e) {
     showToast("PDF তৈরি করতে পারেনি। ইন্টারনেট সংযোগ চেক করুন।", "error");
     console.error(e);
@@ -1495,7 +1495,7 @@ function exportBackupJSON() {
   a.download = `bksp_store_backup_${new Date().toISOString().slice(0, 10)}.json`;
   a.click();
   closeModal("exportModal");
-  showToast("💾 ব্যাকআপ ডাউনলোড হচ্ছে!", "success");
+  showToast("<i class="ph ph-floppy-disk"></i> ব্যাকআপ ডাউনলোড হচ্ছে!", "success");
 }
 
 function importBackupJSON(event) {
@@ -1506,7 +1506,7 @@ function importBackupJSON(event) {
     try {
       const data = JSON.parse(e.target.result);
       if (!data.products || !data.transactions) {
-        return showToast("❌ অবৈধ ব্যাকআপ ফাইল।", "error");
+        return showToast("<i class="ph ph-x-circle"></i> অবৈধ ব্যাকআপ ফাইল।", "error");
       }
       if (
         !confirm(
@@ -1526,15 +1526,15 @@ function importBackupJSON(event) {
           updateLastSaved();
           closeModal("exportModal");
           showToast(
-            `✅ ব্যাকআপ সফলভাবে লোড হয়েছে! ${products.length}টি পণ্য, ${transactions.length}টি লেনদেন।`,
+            `<i class="ph ph-check-circle"></i> ব্যাকআপ সফলভাবে লোড হয়েছে! ${products.length}টি পণ্য, ${transactions.length}টি লেনদেন।`,
             "success",
           );
         })
         .catch((err) =>
-          showToast("❌ Firebase-এ ব্যাকআপ লোড করতে পারেনি।", "error"),
+          showToast("<i class="ph ph-x-circle"></i> Firebase-এ ব্যাকআপ লোড করতে পারেনি।", "error"),
         );
     } catch (err) {
-      showToast("❌ ফাইল পড়তে পারেনি। সঠিক JSON ফাইল দিন।", "error");
+      showToast("<i class="ph ph-x-circle"></i> ফাইল পড়তে পারেনি। সঠিক JSON ফাইল দিন।", "error");
     }
     event.target.value = "";
   };
@@ -1556,7 +1556,7 @@ function installPWA() {
   _pwaPrompt.prompt();
   _pwaPrompt.userChoice.then((result) => {
     if (result.outcome === "accepted") {
-      showToast("✅ অ্যাপ ইনস্টল হচ্ছে!", "success");
+      showToast("<i class="ph ph-check-circle"></i> অ্যাপ ইনস্টল হচ্ছে!", "success");
       const btn = document.getElementById("pwaInstallBtn");
       if (btn) btn.style.display = "none";
     }
@@ -1565,7 +1565,7 @@ function installPWA() {
 }
 
 window.addEventListener("appinstalled", () => {
-  showToast("✅ অ্যাপ সফলভাবে ইনস্টল হয়েছে!", "success");
+  showToast("<i class="ph ph-check-circle"></i> অ্যাপ সফলভাবে ইনস্টল হয়েছে!", "success");
   const btn = document.getElementById("pwaInstallBtn");
   if (btn) btn.style.display = "none";
 });

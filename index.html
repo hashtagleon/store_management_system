@@ -20,30 +20,31 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.6.0/jspdf.plugin.autotable.min.js"></script>
     <link rel="stylesheet" href="style.css" />
+      <script src="https://unpkg.com/@phosphor-icons/web"></script>
   </head>
   <body>
 
     <!-- ====== LOGIN SCREEN ====== -->
     <div id="loginScreen">
       <div class="login-card">
-        <div class="login-icon">📦</div>
+        <div class="login-icon"><i class="ph ph-package"></i></div>
         <h1 class="login-title">বিকেএসপি পাবলিক স্কুল এন্ড কলেজ</h1>
         <p class="login-subtitle">স্টোর ম্যানেজমেন্ট সিস্টেম</p>
 
         <!-- Two access options -->
         <div id="adminLoginToggleSection" class="login-form">
           <button class="btn btn-primary login-btn" style="margin-bottom:12px;" onclick="enterAsViewer()">
-            👁️ স্টক দেখুন
+            <i class="ph ph-eye"></i> স্টক দেখুন
           </button>
           <div class="login-divider"><span>অথবা</span></div>
           <button class="btn btn-outline login-btn" onclick="showAdminLoginForm()">
-            🔐 Admin Login
+            <i class="ph ph-lock-key"></i> Admin Login
           </button>
         </div>
 
         <!-- Admin password form (hidden by default) -->
         <div id="adminLoginSection" class="login-form" style="display:none;">
-          <label class="login-label">🔑 Admin পাসওয়ার্ড</label>
+          <label class="login-label"><i class="ph ph-key"></i> Admin পাসওয়ার্ড</label>
           <input
             type="password"
             id="loginPasswordInput"
@@ -52,7 +53,7 @@
             onkeydown="if(event.key==='Enter') doLogin()"
             autocomplete="off"
           />
-          <p id="loginError" class="login-error" style="display:none;">❌ পাসওয়ার্ড সঠিক নয়।</p>
+          <p id="loginError" class="login-error" style="display:none;"><i class="ph ph-x-circle"></i> পাসওয়ার্ড সঠিক নয়।</p>
           <button class="btn btn-primary login-btn" onclick="doLogin()">প্রবেশ করুন →</button>
           <button class="btn btn-outline login-btn" style="margin-top:8px;" onclick="document.getElementById('adminLoginSection').style.display='none';document.getElementById('adminLoginToggleSection').style.display='block';">← ফিরে যান</button>
         </div>
@@ -64,15 +65,15 @@
 
     <!-- Viewer info bar -->
     <div id="viewerInfoBar" class="viewer-info-bar" style="display:none;">
-      <span>👁️ আপনি <strong>View Only</strong> মোডে আছেন — শুধু দেখতে পারবেন, এডিট করতে পারবেন না।</span>
-      <button class="btn btn-outline btn-sm" onclick="document.getElementById('loginScreen').style.display='flex'; document.getElementById('appContent').style.display='none'; document.getElementById('adminLoginSection').style.display='none'; document.getElementById('adminLoginToggleSection').style.display='block'; sessionStorage.clear();" style="margin-left:12px;font-size:0.78rem;padding:4px 10px;">🔐 Admin Login</button>
+      <span><i class="ph ph-eye"></i> আপনি <strong>View Only</strong> মোডে আছেন — শুধু দেখতে পারবেন, এডিট করতে পারবেন না।</span>
+      <button class="btn btn-outline btn-sm" onclick="document.getElementById('loginScreen').style.display='flex'; document.getElementById('appContent').style.display='none'; document.getElementById('adminLoginSection').style.display='none'; document.getElementById('adminLoginToggleSection').style.display='block'; sessionStorage.clear();" style="margin-left:12px;font-size:0.78rem;padding:4px 10px;"><i class="ph ph-lock-key"></i> Admin Login</button>
     </div>
 
     <!-- Header -->
     <header class="header">
       <div class="header-inner">
         <div class="header-logo">
-          <div class="logo-icon">📦</div>
+          <div class="logo-icon"><i class="ph ph-package"></i></div>
           <div>
             <h1 class="header-title">বিকেএসপি পাবলিক স্কুল এন্ড কলেজ</h1>
             <p class="header-subtitle">স্টোর ম্যানেজমেন্ট সিস্টেম</p>
@@ -81,10 +82,10 @@
         <div class="header-actions">
           <span id="roleBadge" class="role-badge"></span>
           <button class="btn btn-outline" onclick="openModal('exportModal')">
-            📥 Export / Print
+            <i class="ph ph-download-simple"></i> Export / Print
           </button>
           <button class="btn btn-outline btn-reset-header" onclick="openModal('resetModal')" data-admin-only>
-            🔄 রিসেট
+            <i class="ph ph-arrows-clockwise"></i> রিসেট
           </button>
           <button
             class="btn btn-primary"
@@ -94,7 +95,7 @@
             + নতুন পণ্য
           </button>
           <button class="btn btn-outline" onclick="logoutToViewer()" data-admin-only style="font-size:0.8rem;padding:6px 12px;">
-            👁️ Viewer মোড
+            <i class="ph ph-eye"></i> Viewer মোড
           </button>
         </div>
       </div>
@@ -103,7 +104,7 @@
     <!-- ====== LOW STOCK ALERT BANNER ====== -->
     <div id="lowStockBanner" class="low-stock-banner" style="display:none;">
       <div class="lsb-inner">
-        <span class="lsb-icon">⚠️</span>
+        <span class="lsb-icon"><i class="ph ph-warning"></i></span>
         <span id="lowStockBannerText">কিছু পণ্যের স্টক কম বা শেষ হয়ে গেছে।</span>
         <button class="lsb-close" onclick="document.getElementById('lowStockBanner').style.display='none'">✕</button>
       </div>
@@ -113,28 +114,28 @@
     <div class="container">
       <div class="stats-grid">
         <div class="stat-card stat-blue">
-          <div class="stat-icon">📋</div>
+          <div class="stat-icon"><i class="ph ph-clipboard-text"></i></div>
           <div class="stat-info">
             <div class="stat-value" id="totalItems">0</div>
             <div class="stat-label">মোট আইটেম</div>
           </div>
         </div>
         <div class="stat-card stat-green">
-          <div class="stat-icon">✅</div>
+          <div class="stat-icon"><i class="ph ph-check-circle"></i></div>
           <div class="stat-info">
             <div class="stat-value" id="inStock">0</div>
             <div class="stat-label">স্টকে আছে</div>
           </div>
         </div>
         <div class="stat-card stat-red">
-          <div class="stat-icon">⚠️</div>
+          <div class="stat-icon"><i class="ph ph-warning"></i></div>
           <div class="stat-info">
             <div class="stat-value" id="lowStockCount">0</div>
             <div class="stat-label">কম স্টক</div>
           </div>
         </div>
         <div class="stat-card stat-purple">
-          <div class="stat-icon">📊</div>
+          <div class="stat-icon"><i class="ph ph-chart-bar"></i></div>
           <div class="stat-info">
             <div class="stat-value" id="totalTransactions">0</div>
             <div class="stat-label">মোট লেনদেন</div>
@@ -145,22 +146,22 @@
       <!-- Tabs -->
       <div class="tabs">
         <button class="tab active" onclick="switchTab('stock', this)">
-          📦 স্টক রেজিস্টার
+          <i class="ph ph-package"></i> স্টক রেজিস্টার
         </button>
         <button class="tab" onclick="switchTab('transactions', this)">
-          📝 লেনদেন ইতিহাস
+          <i class="ph ph-note-pencil"></i> লেনদেন ইতিহাস
         </button>
         <button class="tab" onclick="switchTab('issue', this)" data-admin-tab>
-          🔄 ইস্যু করুন
+          <i class="ph ph-arrows-clockwise"></i> ইস্যু করুন
         </button>
         <button class="tab" onclick="switchTab('receive', this)" data-admin-tab>
-          📥 মাল গ্রহণ
+          <i class="ph ph-download-simple"></i> মাল গ্রহণ
         </button>
         <button class="tab" onclick="switchTab('report', this)">
-          📊 রিপোর্ট
+          <i class="ph ph-chart-bar"></i> রিপোর্ট
         </button>
         <button class="tab" onclick="switchTab('activitylog', this)" data-admin-tab>
-          📜 কার্যলগ
+          <i class="ph ph-scroll"></i> কার্যলগ
         </button>
       </div>
 
@@ -174,7 +175,7 @@
                 type="text"
                 id="searchStock"
                 class="search-input"
-                placeholder="🔍 পণ্য খুঁজুন..."
+                placeholder="<i class="ph ph-magnifying-glass"></i> পণ্য খুঁজুন..."
                 oninput="filterStock()"
               />
               <select
@@ -221,7 +222,7 @@
                 type="text"
                 id="searchTrans"
                 class="search-input"
-                placeholder="🔍 খুঁজুন..."
+                placeholder="<i class="ph ph-magnifying-glass"></i> খুঁজুন..."
                 oninput="filterTransactions()"
               />
               <select
@@ -264,7 +265,7 @@
       <!-- Issue Tab -->
       <div id="tab-issue" class="tab-content">
         <div class="card form-card">
-          <h2 class="card-title">📤 পণ্য ইস্যু করুন</h2>
+          <h2 class="card-title"><i class="ph ph-upload-simple"></i> পণ্য ইস্যু করুন</h2>
           <form id="issueForm" onsubmit="submitIssue(event)">
             <div class="form-grid">
               <div class="form-group">
@@ -349,7 +350,7 @@
             <div class="form-actions">
               <button type="reset" class="btn btn-outline">রিসেট</button>
               <button type="submit" class="btn btn-danger">
-                📤 ইস্যু নিশ্চিত করুন
+                <i class="ph ph-upload-simple"></i> ইস্যু নিশ্চিত করুন
               </button>
             </div>
           </form>
@@ -359,7 +360,7 @@
       <!-- Receive Tab -->
       <div id="tab-receive" class="tab-content">
         <div class="card form-card">
-          <h2 class="card-title">📥 মাল গ্রহণ (Stock In)</h2>
+          <h2 class="card-title"><i class="ph ph-download-simple"></i> মাল গ্রহণ (Stock In)</h2>
           <form id="receiveForm" onsubmit="submitReceive(event)">
             <div class="form-grid">
               <div class="form-group">
@@ -419,7 +420,7 @@
             <div class="form-actions">
               <button type="reset" class="btn btn-outline">রিসেট</button>
               <button type="submit" class="btn btn-success">
-                📥 গ্রহণ নিশ্চিত করুন
+                <i class="ph ph-download-simple"></i> গ্রহণ নিশ্চিত করুন
               </button>
             </div>
           </form>
@@ -430,7 +431,7 @@
       <!-- ====== REPORT TAB ====== -->
       <div id="tab-report" class="tab-content">
         <div class="card form-card">
-          <h2 class="card-title">📊 তারিখ-ভিত্তিক রিপোর্ট</h2>
+          <h2 class="card-title"><i class="ph ph-chart-bar"></i> তারিখ-ভিত্তিক রিপোর্ট</h2>
           <div class="form-grid" style="margin-bottom:20px;">
             <div class="form-group">
               <label>শুরুর তারিখ</label>
@@ -442,14 +443,14 @@
             </div>
             <div class="form-group" style="justify-content:flex-end;">
               <label style="visibility:hidden;">Action</label>
-              <button class="btn btn-primary" onclick="generateReport()">📊 রিপোর্ট দেখুন</button>
+              <button class="btn btn-primary" onclick="generateReport()"><i class="ph ph-chart-bar"></i> রিপোর্ট দেখুন</button>
             </div>
           </div>
           <div id="reportResult" style="display:none;">
             <div class="report-stats-grid" id="reportSummaryCards"></div>
             <div class="report-tables">
               <div>
-                <h3 class="report-section-title">📥 মাল গ্রহণ (IN)</h3>
+                <h3 class="report-section-title"><i class="ph ph-download-simple"></i> মাল গ্রহণ (IN)</h3>
                 <div class="table-wrapper">
                   <table class="data-table">
                     <thead><tr><th>#</th><th>তারিখ</th><th>পণ্য</th><th>পরিমাণ</th><th>সরবরাহকারী</th><th>মন্তব্য</th></tr></thead>
@@ -458,7 +459,7 @@
                 </div>
               </div>
               <div style="margin-top:24px;">
-                <h3 class="report-section-title">📤 ইস্যু (ISSUE)</h3>
+                <h3 class="report-section-title"><i class="ph ph-upload-simple"></i> ইস্যু (ISSUE)</h3>
                 <div class="table-wrapper">
                   <table class="data-table">
                     <thead><tr><th>#</th><th>তারিখ</th><th>পণ্য</th><th>পরিমাণ</th><th>প্রাপক</th><th>বিভাগ</th><th>মন্তব্য</th></tr></thead>
@@ -468,13 +469,13 @@
               </div>
             </div>
           </div>
-          <div id="reportEmpty" style="display:none;" class="empty-state"><span class="emoji">📅</span>নির্বাচিত তারিখে কোনো লেনদেন নেই।</div>
+          <div id="reportEmpty" style="display:none;" class="empty-state"><span class="emoji"><i class="ph ph-calendar-blank"></i></span>নির্বাচিত তারিখে কোনো লেনদেন নেই।</div>
         </div>
       </div>
       <!-- ====== ACTIVITY LOG TAB ====== -->
       <div id="tab-activitylog" class="tab-content">
         <div class="card form-card">
-          <h2 class="card-title">📜 কার্যক্রম লগ</h2>
+          <h2 class="card-title"><i class="ph ph-scroll"></i> কার্যক্রম লগ</h2>
           <div class="form-grid" style="margin-bottom:16px;">
             <div class="form-group">
               <label>তারিখ দিয়ে ফিল্টার</label>
@@ -484,19 +485,19 @@
               <label>কার্যক্রম ধরন</label>
               <select id="alFilterType" class="form-control" onchange="filterActivityLog()">
                 <option value="">সব কার্যক্রম</option>
-                <option value="add_product">➕ পণ্য যোগ</option>
-                <option value="edit_product">✏️ পণ্য এডিট</option>
-                <option value="delete_product">🗑️ পণ্য মুছে ফেলা</option>
-                <option value="issue">📤 ইস্যু</option>
-                <option value="receive">📥 মাল গ্রহণ</option>
-                <option value="stock_reduce">📉 স্টক কমানো</option>
-                <option value="reset">🔄 রিসেট</option>
-                <option value="csv_import">📋 CSV আমদানি</option>
+                <option value="add_product"><i class="ph ph-plus"></i> পণ্য যোগ</option>
+                <option value="edit_product"><i class="ph ph-pencil-simple"></i> পণ্য এডিট</option>
+                <option value="delete_product"><i class="ph ph-trash"></i> পণ্য মুছে ফেলা</option>
+                <option value="issue"><i class="ph ph-upload-simple"></i> ইস্যু</option>
+                <option value="receive"><i class="ph ph-download-simple"></i> মাল গ্রহণ</option>
+                <option value="stock_reduce"><i class="ph ph-trend-down"></i> স্টক কমানো</option>
+                <option value="reset"><i class="ph ph-arrows-clockwise"></i> রিসেট</option>
+                <option value="csv_import"><i class="ph ph-clipboard-text"></i> CSV আমদানি</option>
               </select>
             </div>
             <div class="form-group" style="justify-content:flex-end;">
               <label style="visibility:hidden;">x</label>
-              <button class="btn btn-outline" onclick="document.getElementById('alFilterDate').value='';document.getElementById('alFilterType').value='';filterActivityLog();">❌ ফিল্টার বাতিল</button>
+              <button class="btn btn-outline" onclick="document.getElementById('alFilterDate').value='';document.getElementById('alFilterType').value='';filterActivityLog();"><i class="ph ph-x-circle"></i> ফিল্টার বাতিল</button>
             </div>
           </div>
           <div class="table-wrapper">
@@ -514,7 +515,7 @@
       <div class="modal" style="max-width:800px;">
         <div class="modal-header">
           <div>
-            <h3>📋 CSV Preview — <span id="csvPreviewCount">0</span>টি পণ্য</h3>
+            <h3><i class="ph ph-clipboard-text"></i> CSV Preview — <span id="csvPreviewCount">0</span>টি পণ্য</h3>
           </div>
           <button class="modal-close" onclick="closeModal('csvPreviewModal')">&#x2715;</button>
         </div>
@@ -527,24 +528,24 @@
         </div>
         <div class="modal-actions">
           <button class="btn btn-outline" onclick="closeModal('csvPreviewModal')">&#x2715; বাতিল</button>
-          <button class="btn btn-primary" onclick="confirmCSVImport()">✓ Import নিশ্চিত করুন</button>
+          <button class="btn btn-primary" onclick="confirmCSVImport()"><i class="ph ph-check"></i> Import নিশ্চিত করুন</button>
         </div>
       </div>
     </div>
     <div id="exportModal" class="modal-overlay" onclick="closeModalOutside(event, 'exportModal')">
       <div class="modal" style="max-width:480px;">
         <div class="modal-header">
-          <h3>📥 Export / Print</h3>
+          <h3><i class="ph ph-download-simple"></i> Export / Print</h3>
           <button class="modal-close" onclick="closeModal('exportModal')">✕</button>
         </div>
 
         <!-- Stock Export -->
         <div class="export-section">
-          <h4 class="export-section-title">📦 স্টক রেজিস্টার</h4>
+          <h4 class="export-section-title"><i class="ph ph-package"></i> স্টক রেজিস্টার</h4>
           <div class="export-btns">
-            <button class="btn btn-outline export-btn" onclick="exportStockCSV()">📄 CSV</button>
-            <button class="btn btn-outline export-btn" onclick="exportStockPDF()">📕 PDF</button>
-            <button class="btn btn-outline export-btn" onclick="printStock()">🖨️ প্রিন্ট</button>
+            <button class="btn btn-outline export-btn" onclick="exportStockCSV()"><i class="ph ph-file-text"></i> CSV</button>
+            <button class="btn btn-outline export-btn" onclick="exportStockPDF()"><i class="ph ph-file-pdf"></i> PDF</button>
+            <button class="btn btn-outline export-btn" onclick="printStock()"><i class="ph ph-printer"></i> প্রিন্ট</button>
           </div>
         </div>
 
@@ -552,7 +553,7 @@
 
         <!-- Transaction Export with date filter -->
         <div class="export-section">
-          <h4 class="export-section-title">📝 লেনদেন ইতিহাস</h4>
+          <h4 class="export-section-title"><i class="ph ph-note-pencil"></i> লেনদেন ইতিহাস</h4>
           <div class="export-date-row">
             <div class="form-group">
               <label>শুরুর তারিখ</label>
@@ -565,9 +566,9 @@
           </div>
           <p class="export-hint">ফাঁকা রাখলে সব লেনদেন export হবে।</p>
           <div class="export-btns">
-            <button class="btn btn-outline export-btn" onclick="exportTransCSV()">📄 CSV</button>
-            <button class="btn btn-outline export-btn" onclick="exportTransPDF()">📕 PDF</button>
-            <button class="btn btn-outline export-btn" onclick="printTransactions()">🖨️ প্রিন্ট</button>
+            <button class="btn btn-outline export-btn" onclick="exportTransCSV()"><i class="ph ph-file-text"></i> CSV</button>
+            <button class="btn btn-outline export-btn" onclick="exportTransPDF()"><i class="ph ph-file-pdf"></i> PDF</button>
+            <button class="btn btn-outline export-btn" onclick="printTransactions()"><i class="ph ph-printer"></i> প্রিন্ট</button>
           </div>
         </div>
 
@@ -575,11 +576,11 @@
 
         <!-- Backup & Restore -->
         <div class="export-section">
-          <h4 class="export-section-title">💾 ব্যাকআপ ও রিস্টোর</h4>
+          <h4 class="export-section-title"><i class="ph ph-floppy-disk"></i> ব্যাকআপ ও রিস্টোর</h4>
           <p class="export-hint">সমস্ত ডেটা JSON ফাইলে সেভ করুন বা আগের ব্যাকআপ লোড করুন।</p>
           <div class="export-btns">
-            <button class="btn btn-outline export-btn" onclick="exportBackupJSON()">💾 ব্যাকআপ নিন</button>
-            <button class="btn btn-outline export-btn" onclick="document.getElementById('importFileInput').click()">📂 রিস্টোর করুন</button>
+            <button class="btn btn-outline export-btn" onclick="exportBackupJSON()"><i class="ph ph-floppy-disk"></i> ব্যাকআপ নিন</button>
+            <button class="btn btn-outline export-btn" onclick="document.getElementById('importFileInput').click()"><i class="ph ph-folder-open"></i> রিস্টোর করুন</button>
           </div>
           <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="importBackupJSON(event)" />
         </div>
@@ -588,11 +589,11 @@
 
         <!-- Bulk CSV Import -->
         <div class="export-section" data-admin-only>
-          <h4 class="export-section-title">📋 Bulk CSV Import</h4>
+          <h4 class="export-section-title"><i class="ph ph-clipboard-text"></i> Bulk CSV Import</h4>
           <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:12px;">CSV ফাইল থেকে একসাথে অনেক পণ্য আমদানি করুন।</p>
           <div class="export-btns">
-            <button class="btn btn-outline export-btn" onclick="downloadCSVTemplate()">⬇️ Template ডাউনলোড</button>
-            <button class="btn btn-primary export-btn" onclick="document.getElementById('csvImportInput').click()">📂 CSV আপলোড করুন</button>
+            <button class="btn btn-outline export-btn" onclick="downloadCSVTemplate()"><i class="ph ph-download-simple"></i> Template ডাউনলোড</button>
+            <button class="btn btn-primary export-btn" onclick="document.getElementById('csvImportInput').click()"><i class="ph ph-folder-open"></i> CSV আপলোড করুন</button>
           </div>
           <input type="file" id="csvImportInput" accept=".csv" style="display:none" onchange="importCSVFile(event)" />
         </div>
@@ -603,11 +604,11 @@
     <!-- Transaction Confirmation Modal -->
     <div id="txnConfirmModal" class="modal-overlay">
       <div class="modal" style="max-width:400px; text-align:center;">
-        <div class="txn-confirm-icon" id="txnConfirmIcon">✅</div>
+        <div class="txn-confirm-icon" id="txnConfirmIcon"><i class="ph ph-check-circle"></i></div>
         <h3 id="txnConfirmTitle" style="margin-bottom:10px; font-size:1.1rem;"></h3>
         <p id="txnConfirmBody" style="color:var(--text-muted); font-size:0.9rem; line-height:1.7; margin-bottom:24px;"></p>
         <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="txnConfirmOK()">
-          ✓ ঠিক আছে
+          <i class="ph ph-check"></i> ঠিক আছে
         </button>
       </div>
     </div>
@@ -706,7 +707,7 @@
             >
               বাতিল
             </button>
-            <button type="submit" class="btn btn-primary">✓ যোগ করুন</button>
+            <button type="submit" class="btn btn-primary"><i class="ph ph-check"></i> যোগ করুন</button>
           </div>
         </form>
       </div>
@@ -724,7 +725,7 @@
           রিসেট করতে পাসওয়ার্ড দিন।
         </p>
         <div class="form-group" style="margin-bottom:8px;">
-          <label>🔑 পাসওয়ার্ড</label>
+          <label><i class="ph ph-key"></i> পাসওয়ার্ড</label>
           <input
             type="password"
             id="resetPassword"
@@ -733,10 +734,10 @@
             onkeydown="if(event.key==='Enter') resetAllData()"
           />
         </div>
-        <p id="resetPassError" style="color:#f87171; font-size:0.82rem; margin-bottom:16px; display:none;">❌ পাসওয়ার্ড সঠিক নয়।</p>
+        <p id="resetPassError" style="color:#f87171; font-size:0.82rem; margin-bottom:16px; display:none;"><i class="ph ph-x-circle"></i> পাসওয়ার্ড সঠিক নয়।</p>
         <div class="modal-actions">
           <button class="btn btn-outline" onclick="closeModal('resetModal')">বাতিল করুন</button>
-          <button class="btn btn-danger" onclick="resetAllData()">🗑️ হ্যাঁ, সব মুছুন</button>
+          <button class="btn btn-danger" onclick="resetAllData()"><i class="ph ph-trash"></i> হ্যাঁ, সব মুছুন</button>
         </div>
       </div>
     </div>
@@ -745,7 +746,7 @@
     <div id="deleteStockModal" class="modal-overlay" onclick="closeModalOutside(event, 'deleteStockModal')">
       <div class="modal">
         <div class="modal-header">
-          <h3>🗑️ স্টক কমান</h3>
+          <h3><i class="ph ph-trash"></i> স্টক কমান</h3>
           <button class="modal-close" onclick="closeModal('deleteStockModal')">✕</button>
         </div>
         <div class="form-group" style="margin-bottom:16px;">
@@ -765,7 +766,7 @@
           <input type="text" id="deleteReason" class="form-control" placeholder="যেমন: নষ্ট হয়েছে, সমন্বয় ইত্যাদি" />
         </div>
         <div class="form-group" style="margin-bottom:8px;">
-          <label>🔑 পাসওয়ার্ড *</label>
+          <label><i class="ph ph-key"></i> পাসওয়ার্ড *</label>
           <input
             type="password"
             id="deleteStockPassword"
@@ -774,10 +775,10 @@
             onkeydown="if(event.key==='Enter') confirmPartialDelete()"
           />
         </div>
-        <p id="deletePassError" style="color:#f87171; font-size:0.82rem; margin-bottom:12px; display:none;">❌ পাসওয়ার্ড সঠিক নয়।</p>
+        <p id="deletePassError" style="color:#f87171; font-size:0.82rem; margin-bottom:12px; display:none;"><i class="ph ph-x-circle"></i> পাসওয়ার্ড সঠিক নয়।</p>
         <div class="modal-actions">
           <button class="btn btn-outline" onclick="closeModal('deleteStockModal')">বাতিল</button>
-          <button class="btn btn-danger" onclick="confirmPartialDelete()">✓ স্টক কমান</button>
+          <button class="btn btn-danger" onclick="confirmPartialDelete()"><i class="ph ph-check"></i> স্টক কমান</button>
         </div>
       </div>
     </div>
@@ -786,7 +787,7 @@
     <div id="editProductModal" class="modal-overlay" onclick="closeModalOutside(event, 'editProductModal')">
       <div class="modal">
         <div class="modal-header">
-          <h3>✏️ পণ্য সম্পাদনা</h3>
+          <h3><i class="ph ph-pencil-simple"></i> পণ্য সম্পাদনা</h3>
           <button class="modal-close" onclick="closeModal('editProductModal')">✕</button>
         </div>
         <form onsubmit="saveEditProduct(event)">
@@ -811,7 +812,7 @@
           </div>
           <div class="modal-actions">
             <button type="button" class="btn btn-outline" onclick="closeModal('editProductModal')">বাতিল</button>
-            <button type="submit" class="btn btn-primary">✓ সংরক্ষণ করুন</button>
+            <button type="submit" class="btn btn-primary"><i class="ph ph-check"></i> সংরক্ষণ করুন</button>
           </div>
         </form>
       </div>
@@ -821,20 +822,20 @@
     <div id="fullDeleteModal" class="modal-overlay" onclick="closeModalOutside(event, 'fullDeleteModal')">
       <div class="modal" style="max-width:420px;">
         <div class="modal-header">
-          <h3>🗑️ পণ্য সম্পূর্ণ মুছুন</h3>
+          <h3><i class="ph ph-trash"></i> পণ্য সম্পূর্ণ মুছুন</h3>
           <button class="modal-close" onclick="closeModal('fullDeleteModal')">✕</button>
         </div>
         <p style="color:var(--text-muted); margin-bottom:16px; line-height:1.7;">
           <strong id="fullDeleteProductName" style="color:#f87171;"></strong> পণ্যটি এবং এর সমস্ত লেনদেন ইতিহাস <strong style="color:#f87171;">চিরতরে মুছে যাবে।</strong>
         </p>
         <div class="form-group" style="margin-bottom:8px;">
-          <label>🔑 পাসওয়ার্ড *</label>
+          <label><i class="ph ph-key"></i> পাসওয়ার্ড *</label>
           <input type="password" id="fullDeletePassword" class="form-control" placeholder="পাসওয়ার্ড লিখুন" onkeydown="if(event.key==='Enter') confirmFullDelete()" />
         </div>
-        <p id="fullDeletePassError" style="color:#f87171; font-size:0.82rem; margin-bottom:16px; display:none;">❌ পাসওয়ার্ড সঠিক নয়।</p>
+        <p id="fullDeletePassError" style="color:#f87171; font-size:0.82rem; margin-bottom:16px; display:none;"><i class="ph ph-x-circle"></i> পাসওয়ার্ড সঠিক নয়।</p>
         <div class="modal-actions">
           <button class="btn btn-outline" onclick="closeModal('fullDeleteModal')">বাতিল</button>
-          <button class="btn btn-danger" onclick="confirmFullDelete()">🗑️ হ্যাঁ, মুছুন</button>
+          <button class="btn btn-danger" onclick="confirmFullDelete()"><i class="ph ph-trash"></i> হ্যাঁ, মুছুন</button>
         </div>
       </div>
     </div>
@@ -844,7 +845,7 @@
       <div class="modal" style="max-width:760px;">
         <div class="modal-header">
           <div>
-            <h3 id="ledgerTitle">📦 পণ্যের ইতিহাস</h3>
+            <h3 id="ledgerTitle"><i class="ph ph-package"></i> পণ্যের ইতিহাস</h3>
             <p id="ledgerSubtitle" style="font-size:0.82rem; color:var(--text-muted); margin-top:4px;"></p>
           </div>
           <button class="modal-close" onclick="closeModal('ledgerModal')">✕</button>
@@ -866,7 +867,7 @@
             <tbody id="ledgerTableBody"></tbody>
           </table>
         </div>
-        <p id="ledgerEmpty" class="empty-state" style="display:none;"><span class="emoji">📋</span>এই পণ্যের কোনো লেনদেন নেই।</p>
+        <p id="ledgerEmpty" class="empty-state" style="display:none;"><span class="emoji"><i class="ph ph-clipboard-text"></i></span>এই পণ্যের কোনো লেনদেন নেই।</p>
       </div>
     </div>
 
@@ -875,9 +876,9 @@
 
     <footer class="footer">
       <div class="footer-inner">
-        <span>Made with ❤️ by MOHAYMINUL ISLAM</span>
+        <span>Made with <i class="ph-fill ph-heart" style="color: #ef9a9a;"></i> by MOHAYMINUL ISLAM</span>
         <span id="lastSavedLabel" class="last-saved"></span>
-        <button class="footer-pwa-btn" id="pwaInstallBtn" style="display:none" onclick="installPWA()">📲 অ্যাপ ইনস্টল করুন</button>
+        <button class="footer-pwa-btn" id="pwaInstallBtn" style="display:none" onclick="installPWA()"><i class="ph ph-device-mobile"></i> অ্যাপ ইনস্টল করুন</button>
       </div>
     </footer>
 
@@ -889,7 +890,7 @@
       background:var(--bg-primary, #0f172a);
       display:none; flex-direction:column;
       align-items:center; justify-content:center; gap:16px;">
-      <div style="font-size:3rem;">🔥</div>
+      <div style="font-size:3rem;"><i class="ph-fill ph-fire" style="color: #ff9800;"></i></div>
       <div style="color:#6366f1; font-size:1.1rem; font-family:'Hind Siliguri',sans-serif;">ডাটা লোড হচ্ছে...</div>
       <div style="width:48px;height:48px;border:4px solid #334155;border-top-color:#6366f1;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
       <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
