@@ -470,6 +470,11 @@ body::after {
   padding: 5px 11px;
   font-size: 0.75rem;
 }
+.btn-xs {
+  padding: 3px 8px;
+  font-size: 0.68rem;
+  border-radius: var(--shape-xs);
+}
 
 .btn-full-delete {
   background: rgba(239, 154, 154, 0.08);
@@ -724,6 +729,24 @@ body::after {
   background: rgba(79,195,247,0.04);
 }
 .data-table tr:last-child td { border-bottom: none; }
+
+.product-info-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.row-actions {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+tr:hover .row-actions {
+  opacity: 1;
+}
 
 /* =====================================================
    BADGES / CHIPS

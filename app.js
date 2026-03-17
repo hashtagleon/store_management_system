@@ -473,7 +473,7 @@ function renderStock(list) {
   const tbody = document.getElementById("stockTableBody");
   const isAdmin = currentRole === "admin";
   if (!list.length) {
-    tbody.innerHTML = `<tr><td colspan="${isAdmin ? 10 : 9}"><div class="empty-state"><span class="emoji"><i class='ph ph-mailbox'></i></span>কোনো পণ্য নেই।${isAdmin ? ' "+ নতুন পণ্য" বাটনে ক্লিক করে পণ্য যোগ করুন।' : ""}</div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="${isAdmin ? 9 : 8}"><div class="empty-state"><span class="emoji"><i class='ph ph-mailbox'></i></span>কোনো পণ্য নেই।${isAdmin ? ' "+ নতুন পণ্য" বাটনে ক্লিক করে পণ্য যোগ করুন।' : ""}</div></td></tr>`;
     return;
   }
   tbody.innerHTML = list
@@ -485,21 +485,28 @@ function renderStock(list) {
           : p.stock <= p.minStock
             ? "stock-warn"
             : "stock-ok";
-      const actionCell = isAdmin
-        ? `<td class="action-cell">
-                <button class="btn btn-sm btn-success" onclick="quickReceive(${p.id})" title="স্টক গ্রহণ">+IN</button>
-                <button class="btn btn-sm btn-danger" onclick="quickIssue(${p.id})" title="ইস্যু করুন">ISSUE</button>
-                <button class="btn btn-sm btn-edit" onclick="editProduct(${p.id})" title="এডিট করুন"><i class='ph ph-pencil-simple'></i></button>
-                <button class="btn btn-sm btn-ledger" onclick="openLedger(${p.id})" title="ইতিহাস দেখুন"><i class='ph ph-clipboard-text'></i></button>
-                <button class="btn btn-sm btn-delete" onclick="deleteProduct(${p.id})" title="স্টক কমান"><i class='ph ph-trend-down'></i></button>
-                <button class="btn btn-sm btn-full-delete" onclick="fullDeleteProduct(${p.id})" title="সম্পূর্ণ মুছুন"><i class='ph ph-trash'></i></button>
-            </td>`
-        : `<td class="action-cell">
-                <button class="btn btn-sm btn-ledger" onclick="openLedger(${p.id})" title="ইতিহাস দেখুন"><i class='ph ph-clipboard-text'></i> ইতিহাস</button>
-            </td>`;
+      
+      const actionsHtml = isAdmin
+        ? `<div class="row-actions">
+                <button class="btn btn-xs btn-success" onclick="quickReceive(${p.id})" title="স্টক গ্রহণ">+IN</button>
+                <button class="btn btn-xs btn-danger" onclick="quickIssue(${p.id})" title="ইস্যু করুন">ISSUE</button>
+                <button class="btn btn-xs btn-edit" onclick="editProduct(${p.id})" title="এডিট করুন"><i class='ph ph-pencil-simple'></i></button>
+                <button class="btn btn-xs btn-ledger" onclick="openLedger(${p.id})" title="ইতিহাস দেখুন"><i class='ph ph-clipboard-text'></i></button>
+                <button class="btn btn-xs btn-delete" onclick="deleteProduct(${p.id})" title="স্টক কমান"><i class='ph ph-trend-down'></i></button>
+                <button class="btn btn-xs btn-full-delete" onclick="fullDeleteProduct(${p.id})" title="সম্পূর্ণ মুছুন"><i class='ph ph-trash'></i></button>
+            </div>`
+        : `<div class="row-actions">
+                <button class="btn btn-xs btn-ledger" onclick="openLedger(${p.id})" title="ইতিহাস দেখুন"><i class='ph ph-clipboard-text'></i> ইতিহাস</button>
+            </div>`;
+
       return `<tr>
             <td>${idx + 1}</td>
-            <td><strong>${p.name}</strong></td>
+            <td>
+                <div class="product-info-cell">
+                    <strong>${p.name}</strong>
+                    ${actionsHtml}
+                </div>
+            </td>
             <td>${p.category}</td>
             <td>${p.unit}</td>
             <td><span class="stock-num ${stockCls}">${p.stock}</span></td>
@@ -507,7 +514,6 @@ function renderStock(list) {
             <td>${p.lastIn ? formatDate(p.lastIn) : "—"}</td>
             <td>${p.lastIssueTo ? `<span title="${p.lastIssue}">${p.lastIssueTo}</span>` : "—"}</td>
             <td><span class="badge ${st.cls}">${st.label}</span></td>
-            ${actionCell}
         </tr>`;
     })
     .join("");
