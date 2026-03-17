@@ -123,6 +123,45 @@ body::after {
   background: radial-gradient(circle, rgba(179, 157, 219, 0.12) 0%, transparent 70%);
 }
 
+/* ===== MOBILE PERFORMANCE OPTIMIZATIONS ===== */
+@media (max-width: 768px) {
+  :root {
+    --glass-blur: blur(8px) !important;
+    --glass-blur-sm: blur(4px) !important;
+  }
+  
+  body::before,
+  body::after {
+    display: none !important;
+  }
+  
+  .login-card, .card, .modal-content {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(20, 20, 30, 0.95) !important;
+  }
+}
+
+/* ===== LITE MODE (Manual Override) ===== */
+.lite-mode * {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  animation: none !important;
+  transition: none !important;
+  box-shadow: none !important;
+}
+.lite-mode body::before, 
+.lite-mode body::after {
+  display: none !important;
+}
+.lite-mode .login-card, 
+.lite-mode .card, 
+.lite-mode .modal-content,
+.lite-mode .header {
+  background: #11111a !important;
+  border-color: #222233 !important;
+}
+
 /* ===== SCROLLBAR ===== */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }

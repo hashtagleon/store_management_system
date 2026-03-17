@@ -176,8 +176,8 @@
                 type="text"
                 id="searchStock"
                 class="search-input"
-                placeholder="🔍 পণ্য খুঁজুন..."
-                oninput="filterStock()"
+                placeholder="🔍 পণ্য বা ক্যাটাগরি খুঁজুন..."
+                oninput="debouncedFilterStock()"
               />
               <select
                 id="filterCategory"
@@ -222,8 +222,8 @@
                 type="text"
                 id="searchTrans"
                 class="search-input"
-                placeholder="🔍 খুঁজুন..."
-                oninput="filterTransactions()"
+                placeholder="🔍 পণ্য বা ব্যক্তি দিয়ে খুঁজুন..."
+                oninput="debouncedFilterTransactions()"
               />
               <select
                 id="filterTransType"
@@ -877,6 +877,7 @@
     <footer class="footer">
       <div class="footer-inner">
         <span>Made with <i class="ph-fill ph-heart" style="color: #ef9a9a;"></i> by MOHAYMINUL ISLAM</span>
+        <button class="btn btn-xs btn-outline" onclick="toggleLiteMode()" id="liteModeBtn"><i class="ph ph-lightning"></i> Lite Mode: OFF</button>
         <span id="lastSavedLabel" class="last-saved"></span>
         <button class="footer-pwa-btn" id="pwaInstallBtn" style="display:none" onclick="installPWA()"><i class="ph ph-device-mobile"></i> অ্যাপ ইনস্টল করুন</button>
       </div>

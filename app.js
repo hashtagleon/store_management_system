@@ -29,6 +29,24 @@ let products = [];
 let transactions = [];
 let activityLog = [];
 
+// Performance helpers
+const debounce = (fn, delay) => {
+  let timeout;
+  return (...args) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => fn(...args), delay);
+  };
+};
+
+let renderQueue = null;
+function queueRender() {
+  if (renderQueue) cancelAnimationFrame(renderQueue);
+  renderQueue = requestAnimationFrame(() => {
+    renderAll();
+    renderQueue = null;
+  });
+}
+
 // Hide the loading overlay
 function hideLoader() {
   const loader = document.getElementById("firebaseLoader");
@@ -126,7 +144,22 @@ function logoutToViewer() {
 }
 
 // ===== INIT (Firebase real-time listener) =====
+function toggleLiteMode() {
+  const isLite = document.body.classList.toggle("lite-mode");
+  localStorage.setItem("lite_mode", isLite);
+  const btn = document.getElementById("liteModeBtn");
+  if (btn) btn.innerHTML = isLite ? "<i class='ph ph-lightning'></i> Lite Mode: ON" : "<i class='ph ph-lightning'></i> Lite Mode: OFF";
+  showToast(isLite ? "Lite Mode চালু হয়েছে (Blurs disabled)" : "Lite Mode বন্ধ হয়েছে", "info");
+}
+
 function init() {
+  // Sync Lite Mode
+  if (localStorage.getItem("lite_mode") === "true") {
+    document.body.classList.add("lite-mode");
+    const btn = document.getElementById("liteModeBtn");
+    if (btn) btn.innerHTML = "<i class='ph ph-lightning'></i> Lite Mode: ON";
+  }
+
   // Show loader only now (after login)
   const loader = document.getElementById("firebaseLoader");
   if (loader) loader.style.display = "flex";
@@ -140,14 +173,13 @@ function init() {
         products = data.products || [];
         transactions = data.transactions || [];
         activityLog = data.activityLog || [];
+        queueRender();
+        updateCategoryFilter();
       } else {
         products = [];
         transactions = [];
         activityLog = [];
       }
-      renderAll();
-      renderActivityLog();
-      setTodayDates();
       updateCategoryFilter();
       hideLoader();
     },
@@ -581,6 +613,7 @@ function filterStock() {
   });
   renderStock(filtered);
 }
+const debouncedFilterStock = debounce(filterStock, 250);
 
 function filterTransactions() {
   const s = document.getElementById("searchTrans").value.toLowerCase();
@@ -597,6 +630,7 @@ function filterTransactions() {
   });
   renderTransactions(filtered);
 }
+const debouncedFilterTransactions = debounce(filterTransactions, 250);
 
 // ===== ISSUE =====
 function updateIssueStock() {
@@ -1619,6 +1653,9 @@ Object.assign(window, {
   closeModalOutside,
   switchTab,
   filterStock,
+  debouncedFilterStock,
+  debouncedFilterTransactions,
+  toggleLiteMode,
   filterTransactions,
   updateIssueStock,
   submitIssue,
