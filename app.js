@@ -1,4 +1,4 @@
-﻿// ===== FIREBASE CONFIG =====
+// ===== FIREBASE CONFIG =====
 // <i class='ph ph-download-simple'></i> Firebase console থেকে আপনার config এখানে paste করুন
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
@@ -985,8 +985,8 @@ function printTransactions() {
     .map((t, i) => {
       const type =
         t.type === "in"
-          ? '<span style="color:#10b981"><i class='ph ph-download-simple'></i> IN</span>'
-          : '<span style="color:#ef4444"><i class='ph ph-upload-simple'></i> ISSUE</span>';
+          ? '<span style="color:#10b981"><i class="ph ph-download-simple"></i> IN</span>'
+          : '<span style="color:#ef4444"><i class="ph ph-upload-simple"></i> ISSUE</span>';
       return `<tr><td>${list.length - i}</td><td>${t.date.replace("T", " ")}</td><td>${type}</td><td>${t.productName}</td><td>${t.qty} ${t.unit}</td><td>${t.person || "—"}</td><td>${t.dept || "—"}</td><td>${t.note || "—"}</td></tr>`;
     })
     .join("");
@@ -1109,7 +1109,7 @@ function updateLowStockBanner() {
         .slice(0, 3)
         .join(", ")}${lowStock.length > 3 ? "..." : ""})`,
     );
-  text.textContent = "<i class='ph ph-warning'></i> সতর্কতা: " + parts.join(" | ");
+  text.innerHTML = `<i class="ph ph-warning"></i> সতর্কতা: ` + parts.join(" | ");
   banner.style.display = "block";
 }
 
@@ -1602,7 +1602,6 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 
 // ===== EXPOSE FUNCTIONS TO GLOBAL SCOPE (required for ES module) =====
-// HTML onclick attributes cannot access module-scoped functions directly
 Object.assign(window, {
   doLogin,
   enterAsViewer,
@@ -1644,72 +1643,11 @@ Object.assign(window, {
   downloadCSVTemplate,
   importCSVFile,
   confirmCSVImport,
+  showToast,
+  formatDate,
+  formatDateTime,
+  updateLowStockBanner,
+  updateLastSaved
 });
 
-// Expose all functions to window for inline HTML handlers
-window.hideLoader = hideLoader;
-window._verifyPwd = _verifyPwd;
-window.enterAsViewer = enterAsViewer;
-window.showAdminLoginForm = showAdminLoginForm;
-window.doLogin = doLogin;
-window.applyRoleUI = applyRoleUI;
-window.logoutToViewer = logoutToViewer;
-window.init = init;
-window.setTodayDates = setTodayDates;
-window.saveData = saveData;
-window.loadData = loadData;
-window.logActivity = logActivity;
-window.renderActivityLog = renderActivityLog;
-window.filterActivityLog = filterActivityLog;
-window.downloadCSVTemplate = downloadCSVTemplate;
-window.importCSVFile = importCSVFile;
-window.previewCSVData = previewCSVData;
-window.confirmCSVImport = confirmCSVImport;
-window.resetAllData = resetAllData;
-window.openModal = openModal;
-window.renderAll = renderAll;
-window.updateStats = updateStats;
-window.stockStatus = stockStatus;
-window.renderStock = renderStock;
-window.renderTransactions = renderTransactions;
-window.renderProductDropdowns = renderProductDropdowns;
-window.updateCategoryFilter = updateCategoryFilter;
-window.filterStock = filterStock;
-window.filterTransactions = filterTransactions;
-window.updateIssueStock = updateIssueStock;
-window.submitIssue = submitIssue;
-window.submitReceive = submitReceive;
-window.showTxnConfirm = showTxnConfirm;
-window.txnConfirmOK = txnConfirmOK;
-window.quickReceive = quickReceive;
-window.quickIssue = quickIssue;
-window.deleteProduct = deleteProduct;
-window.confirmPartialDelete = confirmPartialDelete;
-window.addProduct = addProduct;
-window.downloadCSV = downloadCSV;
-window.exportStockCSV = exportStockCSV;
-window.exportTransCSV = exportTransCSV;
-window.printStock = printStock;
-window.printTransactions = printTransactions;
-window.openPrintWindow = openPrintWindow;
-window.switchTab = switchTab;
-window.closeModal = closeModal;
-window.closeModalOutside = closeModalOutside;
-window.showToast = showToast;
-window.formatDate = formatDate;
-window.formatDateTime = formatDateTime;
-window.updateLowStockBanner = updateLowStockBanner;
-window.editProduct = editProduct;
-window.saveEditProduct = saveEditProduct;
-window.fullDeleteProduct = fullDeleteProduct;
-window.confirmFullDelete = confirmFullDelete;
-window.openLedger = openLedger;
-window.generateReport = generateReport;
-window.updateLastSaved = updateLastSaved;
-window._pdfHeader = _pdfHeader;
-window.exportStockPDF = exportStockPDF;
-window.exportTransPDF = exportTransPDF;
-window.exportBackupJSON = exportBackupJSON;
-window.importBackupJSON = importBackupJSON;
-window.installPWA = installPWA;
 
