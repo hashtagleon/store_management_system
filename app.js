@@ -92,7 +92,7 @@ function applyRoleUI() {
   const badge = document.getElementById("roleBadge");
   const viewerBar = document.getElementById("viewerInfoBar");
   if (badge) {
-    badge.textContent = isAdmin ? "<i class='ph ph-lock-key'></i> Super Admin" : "<i class='ph ph-eye'></i> View Only";
+    badge.innerHTML = isAdmin ? "<i class='ph ph-lock-key'></i> Super Admin" : "<i class='ph ph-eye'></i> View Only";
     badge.className = isAdmin
       ? "role-badge role-admin"
       : "role-badge role-viewer";
@@ -699,9 +699,9 @@ function submitReceive(e) {
 
 // ===== TXN CONFIRM =====
 function showTxnConfirm(title, body, type) {
-  document.getElementById("txnConfirmIcon").textContent =
+  document.getElementById("txnConfirmIcon").innerHTML =
     type === "in" ? "<i class='ph ph-download-simple'></i>" : "<i class='ph ph-upload-simple'></i>";
-  document.getElementById("txnConfirmTitle").textContent = title;
+  document.getElementById("txnConfirmTitle").innerHTML = title;
   document.getElementById("txnConfirmBody").innerHTML = body;
   document.getElementById("txnConfirmModal").classList.add("open");
 }
@@ -1051,7 +1051,7 @@ function closeModalOutside(e, id) {
 let toastTimer;
 function showToast(msg, type = "info") {
   const t = document.getElementById("toast");
-  t.textContent = msg;
+  t.innerHTML = msg;
   t.className = `toast ${type} show`;
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.classList.remove("show"), 3500);
@@ -1214,7 +1214,7 @@ function openLedger(id) {
   const pTxns = [...transactions.filter((t) => t.productId === id)].sort(
     (a, b) => new Date(b.date) - new Date(a.date),
   );
-  document.getElementById("ledgerTitle").textContent =
+  document.getElementById("ledgerTitle").innerHTML =
     "<i class='ph ph-package'></i> " + p.name + " — ইতিহাস";
   document.getElementById("ledgerSubtitle").textContent =
     `ক্যাটাগরি: ${p.category} | একক: ${p.unit} | বর্তমান স্টক: ${p.stock}`;
@@ -1316,7 +1316,7 @@ function updateLastSaved() {
   const el = document.getElementById("lastSavedLabel");
   if (!el) return;
   const now = new Date();
-  el.textContent = `<i class='ph ph-floppy-disk'></i> সর্বশেষ সেভ: ${now.toLocaleTimeString("bn-BD", { hour: "2-digit", minute: "2-digit" })}`;
+  el.innerHTML = `<i class='ph ph-floppy-disk'></i> সর্বশেষ সেভ: ${now.toLocaleTimeString("bn-BD", { hour: "2-digit", minute: "2-digit" })}`;
 }
 
 // saveData already calls updateLastSaved() via .then() above
