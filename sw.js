@@ -1,6 +1,6 @@
 // ===== SERVICE WORKER =====
 // BKSP Store Management System — Offline Support
-const CACHE_NAME = 'bksp-store-v2';
+const CACHE_NAME = 'bksp-store-v3';
 const ASSETS = [
     './',
     './index.html',
@@ -10,6 +10,7 @@ const ASSETS = [
     './icons/icon-192.png',
     './icons/icon-512.png',
     'https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Hind+Siliguri:wght@300;400;500;600;700&display=swap',
+    'https://unpkg.com/@phosphor-icons/web',
     'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
     'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.6.0/jspdf.plugin.autotable.min.js'
 ];
